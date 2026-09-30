@@ -4,14 +4,15 @@ services:
     image: dis:latest
     container_name: dis
     restart: unless-stopped
+    # Ajustes opcionales en un fichero .env junto a este (ver .env.example).
     ports:
-      - "8088:8088"
+      - "${DIS_PORT:-8088}:8088"
     environment:
       # Raíz del host montada abajo: de aquí salen los discos de "Recursos".
       DIS_HOST_ROOT: /hostfs
-      # CERBERO_URL: "http://127.0.0.1:9000"
-      # DIS_PUBLIC_HOST: "server-kuro"
-      # DIS_DISKS: "/,/home"
+      DIS_PUBLIC_HOST: ${DIS_PUBLIC_HOST:-}
+      DIS_DISKS: ${DIS_DISKS:-}
+      CERBERO_URL: ${CERBERO_URL:-}
     volumes:
       # Solo lectura a nivel de fichero. OJO: el socket da acceso completo a la
       # API de Docker igualmente; Dis solo hace llamadas de lectura.
