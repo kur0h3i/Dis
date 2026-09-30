@@ -38,6 +38,7 @@ import {
   clearPositions,
   gridLayout,
   loadPositions,
+  NODE_HEIGHT,
   NODE_WIDTH,
   type Positions,
   savePositions,
@@ -52,8 +53,6 @@ const FIT_VIEW: FitViewOptions = {
   padding: { top: '175px', right: 0.1, bottom: 0.1, left: 0.1 },
   maxZoom: 1,
 };
-// Alto aproximado de un nodo, para centrar uno que aún no se ha medido.
-const NODE_HEIGHT_GUESS = 140;
 
 const nodeTypes: NodeTypes = { service: ServiceNode };
 
@@ -216,7 +215,7 @@ function MapCanvas({ theme, selection, onSelect }: Props) {
       const node = getNode(id);
       if (!node || (!always && !node.measured?.width)) return;
       const w = node.measured?.width ?? NODE_WIDTH;
-      const h = node.measured?.height ?? NODE_HEIGHT_GUESS;
+      const h = node.measured?.height ?? NODE_HEIGHT;
       const { width, height } = store.getState();
       const panelW = Math.min(PANEL_MAX_WIDTH, window.innerWidth);
       const visibleW = width - panelW;

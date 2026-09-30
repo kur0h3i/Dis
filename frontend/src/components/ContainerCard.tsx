@@ -2,6 +2,7 @@ import type { ContainerSummary } from '../api/types';
 import { clickableProps } from '../lib/a11y';
 import { formatMb, formatPct, formatPort, formatUptime, STATUS_LABEL } from '../lib/format';
 import { ExternalLink } from './ExternalLink';
+import { ServiceIcon } from './ServiceIcon';
 import { StatusDot } from './StatusDot';
 
 interface Props {
@@ -22,15 +23,18 @@ export function ContainerCard({ container: c, onSelect, selected = false }: Prop
       } ${running ? '' : 'opacity-70'}`}
     >
       <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <StatusDot status={c.status} />
-            <span className="truncate font-mono text-sm font-semibold text-ink group-hover:text-accent-ink">
-              {c.name}
-            </span>
-          </div>
-          <div className="mt-0.5 truncate font-mono text-xs text-faint" title={c.image}>
-            {c.image}
+        <div className="flex min-w-0 items-center gap-3">
+          <ServiceIcon icons={c.icons} name={c.name} size={32} />
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <StatusDot status={c.status} />
+              <span className="truncate font-mono text-sm font-semibold text-ink group-hover:text-accent-ink">
+                {c.name}
+              </span>
+            </div>
+            <div className="mt-0.5 truncate font-mono text-xs text-faint" title={c.image}>
+              {c.image}
+            </div>
           </div>
         </div>
         {c.url && running && <ExternalLink href={c.url} />}

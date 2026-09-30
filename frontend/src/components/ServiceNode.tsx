@@ -5,6 +5,7 @@ import { formatMb, formatPct, formatUptime, STATUS_LABEL } from '../lib/format';
 import { NODE_WIDTH } from '../lib/graphLayout';
 import { selectionFor } from '../lib/selection';
 import { ExternalLink } from './ExternalLink';
+import { ServiceIcon } from './ServiceIcon';
 import { StatusDot } from './StatusDot';
 
 export type ServiceNodeData = {
@@ -39,6 +40,7 @@ function ServiceNodeImpl({ data, selected }: NodeProps<ServiceFlowNode>) {
       <Handle type="target" position={Position.Top} isConnectable={false} className="opacity-0!" />
 
       <div className="flex items-center gap-2 border-b border-line bg-surface-2 px-3 py-2">
+        <ServiceIcon icons={node.icons} name={node.label} size={22} />
         <StatusDot status={node.status} />
         <span className="truncate font-mono text-sm font-semibold text-ink">{node.label}</span>
         <span className="ml-auto shrink-0 font-mono text-[10px] text-faint uppercase">

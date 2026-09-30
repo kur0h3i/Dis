@@ -14,11 +14,14 @@ cómo dependen unos de otros. Sustituye a Homepage en **server-kuro**.
 ![Dashboard de Dis](docs/dashboard.png)
 
 - **Cero configuración para empezar.** Lee Docker y muestra todos los contenedores, con su
-  enlace (por el puerto que publican) y sus dependencias (por el `depends_on` de Compose).
+  logo (por la imagen), su enlace (por el puerto que publican) y sus dependencias (por el
+  `depends_on` de Compose).
 - **Dashboard**: CPU, RAM y discos del servidor con histórico de 5 min, una tarjeta por
   contenedor y por herramienta, y las alertas de Cerbero.
-- **Mapa** de servicios: al pasar el ratón por uno se resaltan sus dependencias; buscador
-  (`/`), filtros por estado y nodos que se pueden recolocar.
+- **Mapa** de servicios: cada app con su base de datos y su caché forma un grupo aparte,
+  colocado por capas para que las flechas se crucen lo menos posible y nada se solape.
+  Al pasar el ratón por uno se resaltan sus dependencias; buscador (`/`), filtros por estado
+  y nodos que se pueden recolocar.
 - **Panel de detalle**: métricas en vivo, puertos, variables de entorno (con las credenciales
   ocultas) y los últimos logs.
 - **Botón «+ Añadir»** que genera la configuración de un servicio nuevo, y `dis.yaml` que se
@@ -81,9 +84,11 @@ que declaras a mano siempre tiene prioridad sobre lo detectado.
 | Contenedores (también los parados), estado, salud, CPU, RAM, puertos y logs | API de Docker | — |
 | Enlace a la UI | El primer puerto web publicado: ignora bases de datos, colas, SSH… y lo publicado solo en `127.0.0.1`; 443/8443/9443 van por `https` | Label `dis.url` (o `dis.url: ""` para quitar el enlace) |
 | Descripción | Labels OCI de la imagen (`org.opencontainers.image.description` o `title`) | Label `dis.description` |
+| Logo | La imagen en el catálogo [dashboard-icons](https://github.com/homarr-labs/dashboard-icons) (`postgres:16` → PostgreSQL, `ghcr.io/immich-app/immich-server` → Immich); si no está, el favicon de su web; si tampoco, la inicial | Label `dis.icon` (o `dis.icon: ""` para quitarlo) |
 | Dependencias (aristas del mapa) | `depends_on` de Docker Compose, dentro de cada proyecto | Label `dis.depends_on` (se suma a las de Compose) |
 | Herramienta ↔ contenedor | Un contenedor que se llama igual que el `id` de la herramienta | `container:` en la herramienta |
 | Enlace de una herramienta | El de su contenedor | `url:` en la herramienta |
+| Logo de una herramienta | El de su contenedor o, si no tiene, el favicon de su `url` | `icon:` en la herramienta |
 
 En el panel de detalle, lo deducido lleva una nota («enlace deducido del puerto publicado»,
 «incluye el depends_on de Compose»). Para desactivar la autodetección, en `dis.yaml`:
@@ -93,8 +98,14 @@ autodetect:
   urls: true          # false = sin enlaces automáticos
   descriptions: true
   dependencies: true
+  icons: true         # false = solo los logos declarados con dis.icon / icon:
 # o, para todo a la vez:  autodetect: false
 ```
+
+Los logos los carga el navegador desde `cdn.jsdelivr.net`, y Dis descarga una vez al día el
+índice del catálogo (~200 KB) para saber qué logos existen. Sin Internet en el servidor, Dis
+propone los nombres a ciegas y el navegador descarta los que no existan; sin Internet en el
+navegador, se ven los favicons de tus servicios o las iniciales.
 
 ## Añadir un servicio
 
@@ -118,7 +129,13 @@ services:
       dis.url: "http://{host}:3000"          # opcional: se detecta por el puerto
       dis.description: "Paneles de métricas"
       dis.depends_on: "prometheus,minos-db"  # separadas por comas
+      dis.icon: "grafana"                    # opcional: se detecta por la imagen
 ```
+
+`dis.icon` (e `icon:` en `dis.yaml`) acepta un nombre del catálogo
+[dashboard-icons](https://github.com/homarr-labs/dashboard-icons), el mismo que usa Homepage,
+con o sin extensión (`grafana`, `grafana.png`), o la URL de cualquier imagen
+(`http://{host}:8081/logo.svg`).
 
 **2. Un contenedor cuyo compose no quieres tocar: `containers:` en `dis.yaml`.**
 
@@ -128,6 +145,7 @@ containers:
     url: "http://{host}:9080"
     description: Adminer (UI web de la BD de Minos)
     depends_on: [minos-db]
+    icon: adminer
 ```
 
 **3. Una herramienta propia: `tools:` en `dis.yaml`.** Para tus proyectos, corran en Docker o
@@ -142,6 +160,7 @@ tools:
     url: "http://{host}:8081" # opcional si su contenedor publica el puerto
     container: caronte        # opcional si el contenedor se llama igual que el id
     depends_on: [minos-db]
+    icon: "http://{host}:8081/favicon.svg"  # opcional: se prueba el favicon de su url
 ```
 
 `dis.yaml` **se recarga solo** al guardarlo, sin reiniciar Dis. Si queda con un error de
@@ -167,10 +186,12 @@ autodetect:              # ver "Qué detecta Dis solo"
   urls: true
   descriptions: true
   dependencies: true
+  icons: true
 
-containers: {}           # metadatos por nombre de contenedor (url, description, depends_on)
+containers: {}           # metadatos por nombre de contenedor (url, description,
+                         #   depends_on, icon)
 tools: []                # herramientas propias (id, name, description, stage, url,
-                         #   container, depends_on)
+                         #   container, depends_on, icon)
 edges:                   # aristas sueltas entre dos nodos cualesquiera
   - { source: minos, target: caronte }
 ```
@@ -277,6 +298,7 @@ Dis/
 │   │   ├── main.py            rutas de la API y servido del frontend compilado
 │   │   ├── config.py          dis.yaml (con recarga en caliente) y variables de entorno
 │   │   ├── autodetect.py      enlaces, descripciones y dependencias deducidos de Docker
+│   │   ├── icons.py           logos: catálogo dashboard-icons, favicons y dis.icon
 │   │   ├── docker_service.py  contenedores, stats y logs (solo lectura)
 │   │   ├── ecosystem.py       herramientas y grafo de servicios
 │   │   ├── host_service.py    CPU, RAM y discos, con histórico de 5 min en memoria
@@ -302,7 +324,7 @@ Todas son `GET` y devuelven JSON. `{id}` acepta el id o el nombre del contenedor
 
 | Ruta | Devuelve |
 |---|---|
-| `/api/containers` | `id, name, image, status, ports, uptime_s, cpu_pct, mem_mb, url, description, depends_on, detected` |
+| `/api/containers` | `id, name, image, status, ports, uptime_s, cpu_pct, mem_mb, url, description, depends_on, icons, detected` |
 | `/api/containers/{id}` | lo anterior + `env` (enmascarado), `labels`, `command` |
 | `/api/containers/{id}/stats` | `cpu_pct, mem_mb, mem_limit_mb, net_rx_b, net_tx_b` |
 | `/api/containers/{id}/logs` | `{lines}`: las últimas 100 líneas |

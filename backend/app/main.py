@@ -15,9 +15,9 @@ from fastapi.staticfiles import StaticFiles
 
 from . import docker_service
 from .cerbero import fetch_alerts
-from .config import Settings, config_status, get_settings, resolve_url
+from .config import Settings, config_status, get_settings, resolve_url, resolve_urls
 from .docker_service import ContainerNotFoundError, DockerUnavailableError
-from .ecosystem import build_graph, build_tools
+from .ecosystem import build_graph, build_tools, share_tool_icons
 from .host_service import HostSampler, get_resources
 from .models import (
     Alerts,
@@ -93,16 +93,20 @@ def resources(
 @app.get("/api/containers", response_model=list[ContainerSummary])
 def containers(request: Request, settings: SettingsDep) -> list[ContainerSummary]:
     items = docker_service.list_containers(settings)
+    share_tool_icons(settings, items)
     host = _request_host(request)
     for c in items:
         c.url = resolve_url(c.url, host, settings)
+        c.icons = resolve_urls(c.icons, host, settings)
     return items
 
 
 @app.get("/api/containers/{container_id}", response_model=ContainerDetail)
 def container_detail(container_id: str, request: Request, settings: SettingsDep) -> ContainerDetail:
     detail = docker_service.get_container(container_id, settings)
-    detail.url = resolve_url(detail.url, _request_host(request), settings)
+    host = _request_host(request)
+    detail.url = resolve_url(detail.url, host, settings)
+    detail.icons = resolve_urls(detail.icons, host, settings)
     return detail
 
 

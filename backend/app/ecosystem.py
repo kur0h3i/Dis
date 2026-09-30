@@ -8,8 +8,12 @@ métricas del contenedor.
 
 from __future__ import annotations
 
-from .config import Settings, ToolConfig, resolve_url
+from .config import Settings, ToolConfig, resolve_url, resolve_urls
+from .icons import declared_icon, guess_icons
 from .models import ContainerSummary, Graph, GraphEdge, GraphNode, Tool, ToolStatus
+
+# Logo de Dis: su favicon (frontend/public/dis.svg).
+SELF_ICON = "/dis.svg"
 
 
 def linked_container(
@@ -42,6 +46,32 @@ def tool_status(
     return "running"
 
 
+def tool_icons(
+    tool: ToolConfig, summary: ContainerSummary | None, url: str | None, settings: Settings
+) -> list[str]:
+    """Logo declarado, el de Dis, el de su contenedor o, sin contenedor, el deducido
+    del favicon de su web o de su id."""
+    if "icon" in tool.model_fields_set:
+        return declared_icon(tool.icon)
+    if tool.self:
+        return [SELF_ICON]
+    if summary is not None:
+        return summary.icons
+    return guess_icons(None, url, tool.id) if settings.autodetect.icons else []
+
+
+def share_tool_icons(settings: Settings, containers: list[ContainerSummary]) -> None:
+    """El contenedor de una herramienta con logo propio (declarado, o el de Dis)
+    lo comparte, para que tarjeta y nodo no muestren logos distintos."""
+    by_name = {c.name: c for c in containers}
+    for t in settings.tools:
+        if not t.self and "icon" not in t.model_fields_set:
+            continue
+        name = linked_container(t, settings, by_name)
+        if name in by_name:
+            by_name[name].icons = tool_icons(t, None, None, settings)
+
+
 def build_tools(
     settings: Settings, containers: list[ContainerSummary] | None, request_host: str | None
 ) -> list[Tool]:
@@ -63,6 +93,7 @@ def build_tools(
                 depends_on=t.depends_on,
                 container=container,
                 is_self=t.self,
+                icons=resolve_urls(tool_icons(t, summary, url, settings), request_host, settings),
             )
         )
     return tools
@@ -86,6 +117,7 @@ def build_graph(
             description=tool.description,
             container=tool.container,
             is_self=tool.is_self,
+            icons=tool.icons,
         )
         if tool.container:
             alias[tool.container] = tool.id
@@ -101,6 +133,7 @@ def build_graph(
             url=resolve_url(c.url, request_host, settings),
             description=c.description or c.image,
             container=c.name,
+            icons=resolve_urls(c.icons, request_host, settings),
         )
 
     raw_edges = [(t.id, dep) for t in tools for dep in t.depends_on]

@@ -39,6 +39,9 @@ class ContainerSummary(BaseModel):
     # Del label ``dis.depends_on``, de ``containers.<nombre>.depends_on`` y, si
     # está activado, del ``depends_on`` de Docker Compose.
     depends_on: list[str] = Field(default_factory=list)
+    # URLs candidatas del logo, de la más a la menos probable: el frontend usa la
+    # primera que carga (ver icons.py). Vacía = monograma con la inicial.
+    icons: list[str] = Field(default_factory=list)
     # Campos que Dis ha deducido en vez de leerlos de la config (ver autodetect.py).
     detected: list[Literal["url", "description", "depends_on"]] = Field(default_factory=list)
 
@@ -102,6 +105,7 @@ class Tool(BaseModel):
     depends_on: list[str]
     container: str | None = None
     is_self: bool = False
+    icons: list[str] = Field(default_factory=list)
 
 
 class GraphNode(BaseModel):
@@ -114,6 +118,7 @@ class GraphNode(BaseModel):
     # Nombre del contenedor asociado (para cruzar métricas y abrir el panel).
     container: str | None = None
     is_self: bool = False
+    icons: list[str] = Field(default_factory=list)
 
 
 class GraphEdge(BaseModel):

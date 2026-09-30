@@ -2,6 +2,7 @@ import type { Tool } from '../api/types';
 import { clickableProps } from '../lib/a11y';
 import { STATUS_LABEL } from '../lib/format';
 import { ExternalLink } from './ExternalLink';
+import { ServiceIcon } from './ServiceIcon';
 import { StatusDot } from './StatusDot';
 
 interface Props {
@@ -15,6 +16,7 @@ export function ToolCard({ tool: t, onSelect }: Props) {
     <>
       <div className="flex items-start justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
+          <ServiceIcon icons={t.icons} name={t.name} size={24} />
           <StatusDot status={t.status} />
           <span className="truncate font-mono text-sm font-semibold text-ink">{t.name}</span>
         </div>

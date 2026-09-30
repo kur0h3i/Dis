@@ -23,10 +23,14 @@ autodetect:
   urls: true          # enlace = primer puerto web publicado (no BD ni 127.0.0.1)
   descriptions: true  # descripción = labels OCI de la imagen
   dependencies: true  # aristas = depends_on de Docker Compose
+  icons: true         # logo = la imagen en el catálogo dashboard-icons o el favicon
 
-# Metadatos de contenedores Docker (url, description, depends_on). También se
-# pueden poner como labels en el propio contenedor: `dis.url`, `dis.description`
-# y `dis.depends_on` (separadas por comas); el label tiene prioridad.
+# Metadatos de contenedores Docker (url, description, depends_on, icon). También
+# se pueden poner como labels en el propio contenedor: `dis.url`,
+# `dis.description`, `dis.depends_on` (separadas por comas) y `dis.icon`; el
+# label tiene prioridad. `icon` es un nombre del catálogo dashboard-icons
+# (https://github.com/homarr-labs/dashboard-icons), con o sin extensión
+# (`nextcloud`, `nextcloud.png`), o una URL; vacío = sin logo.
 containers:
   minos-adminer:
     url: "http://{host}:9080"
@@ -39,6 +43,8 @@ containers:
 #   container: nombre del contenedor que la implementa (opcional; si falta, se
 #              usa el contenedor que se llame igual que el id, si existe)
 #   depends_on: ids de herramientas o nombres de contenedores
+#   icon: logo, como en `containers` (opcional; si falta, el de su contenedor o
+#         el favicon de su url)
 tools:
   - id: dis
     name: Dis

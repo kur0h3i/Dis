@@ -25,6 +25,8 @@ export interface ContainerSummary {
   url: string | null;
   description: string | null;
   depends_on: string[];
+  /** URLs candidatas del logo, de la más a la menos probable; vacía = inicial. */
+  icons: string[];
   /** Campos deducidos por Dis (puerto publicado, labels OCI, depends_on de Compose). */
   detected: ('url' | 'description' | 'depends_on')[];
 }
@@ -88,6 +90,7 @@ export interface Tool {
   depends_on: string[];
   container: string | null;
   is_self: boolean;
+  icons: string[];
 }
 
 export interface GraphNode {
@@ -99,6 +102,7 @@ export interface GraphNode {
   description: string | null;
   container: string | null;
   is_self: boolean;
+  icons: string[];
 }
 
 export interface GraphEdge {

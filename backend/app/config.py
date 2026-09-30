@@ -45,6 +45,9 @@ class ToolConfig(BaseModel):
     # herramienta hereda su estado y métricas y en el grafo son un único nodo.
     container: str | None = None
     depends_on: list[str] = Field(default_factory=list)
+    # Logo: nombre del catálogo dashboard-icons (``nextcloud``) o URL; vacío = sin
+    # logo. Si falta, se deduce (ver icons.py).
+    icon: str | None = None
     # ``True`` solo para Dis: siempre "running" y sin enlace externo ("estás aquí").
     self: bool = False
 
@@ -61,6 +64,8 @@ class ContainerConfig(BaseModel):
     description: str | None = None
     # Contenedores o herramientas de los que depende (aristas del grafo).
     depends_on: list[str] = Field(default_factory=list)
+    # Logo, como en ToolConfig.
+    icon: str | None = None
 
 
 class AutodetectConfig(BaseModel):
@@ -72,6 +77,8 @@ class AutodetectConfig(BaseModel):
     descriptions: bool = True
     # Aristas del grafo a partir del ``depends_on`` de Docker Compose.
     dependencies: bool = True
+    # Logo a partir de la imagen (catálogo dashboard-icons) o del favicon de su web.
+    icons: bool = True
 
 
 class EdgeConfig(BaseModel):
@@ -96,7 +103,7 @@ class Settings(BaseModel):
     def _autodetect_shorthand(cls, v: object) -> object:
         # ``autodetect: false`` (o ``true``) activa o desactiva todo de golpe.
         if isinstance(v, bool):
-            return {"urls": v, "descriptions": v, "dependencies": v}
+            return {"urls": v, "descriptions": v, "dependencies": v, "icons": v}
         return {} if v is None else v
 
     def tool_for_container(self, container_name: str) -> ToolConfig | None:
@@ -219,3 +226,8 @@ def resolve_url(url: str | None, request_host: str | None, settings: Settings) -
         return None
     host = settings.public_host or request_host or "localhost"
     return url.replace("{host}", host)
+
+
+def resolve_urls(urls: list[str], request_host: str | None, settings: Settings) -> list[str]:
+    """``resolve_url`` para una lista (los logos candidatos)."""
+    return [resolve_url(u, request_host, settings) or u for u in urls]
