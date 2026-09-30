@@ -1,0 +1,26 @@
+services:
+  dis:
+    build: .
+    image: dis:latest
+    container_name: dis
+    restart: unless-stopped
+    ports:
+      - "8088:8088"
+    environment:
+      # Raíz del host montada abajo: de aquí salen los discos de "Recursos".
+      DIS_HOST_ROOT: /hostfs
+      # CERBERO_URL: "http://127.0.0.1:9000"
+      # DIS_PUBLIC_HOST: "server-kuro"
+      # DIS_DISKS: "/,/home"
+    volumes:
+      # Solo lectura a nivel de fichero. OJO: el socket da acceso completo a la
+      # API de Docker igualmente; Dis solo hace llamadas de lectura.
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Raíz del host en solo lectura, para medir el uso de los discos.
+      - /:/hostfs:ro
+      # Config editable sin reconstruir la imagen (reiniciar el contenedor).
+      - ./dis.yaml:/app/dis.yaml:ro
+    mem_limit: 150m
+    cpus: 0.5
+    labels:
+      dis.description: "Dashboard central de server-kuro"
