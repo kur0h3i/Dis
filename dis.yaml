@@ -1,0 +1,71 @@
+# Configuración de Dis.
+#
+# `{host}` en cualquier URL se sustituye por el host con el que accedes a Dis
+# (IP de la LAN, nombre de Tailscale...), o por `public_host` si lo defines.
+# Las variables de entorno CERBERO_URL, DIS_PUBLIC_HOST, DIS_HOST_ROOT y
+# DIS_DISKS tienen prioridad sobre este fichero.
+
+# URL base de la API de Cerbero. Vacío = "Cerbero no conectado".
+cerbero_url: null
+
+# Host fijo para los enlaces (opcional). Si es null se usa el de la petición.
+public_host: null
+
+# Puntos de montaje del HOST a mostrar en "Recursos".
+disks:
+  - /
+
+# Metadatos de contenedores Docker. También se puede usar el label `dis.url`
+# (y `dis.description`) en el propio contenedor; el label tiene prioridad.
+containers:
+  minos-adminer:
+    url: "http://{host}:9080"
+    description: Adminer (UI web de la BD de Minos)
+  minos-db:
+    description: PostgreSQL 16 — datos de Minos
+
+# Herramientas propias del ecosistema.
+#   stage: operational | development | idea
+#   container: nombre del contenedor que la implementa (opcional)
+#   depends_on: ids de herramientas o nombres de contenedores
+tools:
+  - id: dis
+    name: Dis
+    description: Dashboard central de server-kuro
+    stage: operational
+    container: dis
+    self: true
+
+  - id: caronte
+    name: Caronte
+    description: Visualizador de BD; sustituto de Adminer
+    stage: operational
+    url: "http://{host}:8081"   # ajusta al puerto real de Caronte
+    depends_on: [minos-db]
+
+  - id: minos
+    name: Minos
+    description: OSINT
+    stage: operational
+    url: "http://{host}:8082"   # ajusta al puerto real de Minos
+    depends_on: [minos-db]
+
+  - id: cerbero
+    name: Cerbero
+    description: Monitor de recursos, Docker y accesos; API futura
+    stage: development
+
+  - id: vergil
+    name: Vergil
+    description: Gestor de IAs
+    stage: development
+
+  - id: gerion
+    name: Gerión
+    description: Honeypot
+    stage: idea
+
+# Dependencias extra entre contenedores (las de las herramientas salen de depends_on).
+edges:
+  - source: minos-adminer
+    target: minos-db
