@@ -1,7 +1,9 @@
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useRef } from 'react';
 import { getJson } from './client';
 import type {
   Alerts,
+  ConfigStatus,
   ContainerDetail,
   ContainerLogs,
   ContainerStats,
@@ -18,6 +20,7 @@ export const POLL = {
   tools: 30_000,
   graph: 30_000,
   alerts: 30_000,
+  config: 30_000,
   panelStats: 5_000,
 } as const;
 
@@ -30,6 +33,7 @@ export const keys = {
   tools: ['tools'] as const,
   graph: ['graph'] as const,
   alerts: ['alerts'] as const,
+  config: ['config'] as const,
 };
 
 export function useResources() {
@@ -74,6 +78,32 @@ export function useAlerts() {
     queryFn: ({ signal }) => getJson<Alerts>('/api/alerts', signal),
     refetchInterval: POLL.alerts,
   });
+}
+
+/** Estado de dis.yaml (se recarga solo en el servidor al editarlo). */
+export function useConfigStatus(refetchInterval: number = POLL.config) {
+  return useQuery({
+    queryKey: keys.config,
+    queryFn: ({ signal }) => getJson<ConfigStatus>('/api/config', signal),
+    refetchInterval,
+  });
+}
+
+/**
+ * Cuando el servidor recarga dis.yaml, refresca lo que sale de él (herramientas,
+ * grafo, metadatos de contenedores) sin esperar al siguiente polling.
+ */
+export function useRefreshOnConfigReload(loadedAt: number | null | undefined) {
+  const qc = useQueryClient();
+  const seen = useRef(loadedAt);
+  useEffect(() => {
+    if (seen.current != null && loadedAt != null && loadedAt !== seen.current) {
+      for (const queryKey of [keys.tools, keys.graph, keys.containers]) {
+        void qc.invalidateQueries({ queryKey, exact: true });
+      }
+    }
+    seen.current = loadedAt;
+  }, [loadedAt, qc]);
 }
 
 const enc = encodeURIComponent;

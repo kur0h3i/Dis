@@ -24,6 +24,7 @@ export interface ContainerSummary {
   mem_mb: number | null;
   url: string | null;
   description: string | null;
+  depends_on: string[];
 }
 
 export interface EnvVar {
@@ -107,6 +108,14 @@ export interface Graph {
   nodes: GraphNode[];
   edges: GraphEdge[];
   docker_available: boolean;
+}
+
+export interface ConfigStatus {
+  path: string | null;
+  /** Epoch en segundos de la última carga correcta de dis.yaml. */
+  loaded_at: number | null;
+  /** Error de la última recarga (se sigue usando la config anterior). */
+  error: string | null;
 }
 
 export interface Alerts {

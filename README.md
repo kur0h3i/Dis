@@ -70,7 +70,10 @@ El compose monta:
 | `/:/hostfs:ro` | medir el uso de los discos del host (`DIS_HOST_ROOT=/hostfs`) |
 | `./dis.yaml:/app/dis.yaml:ro` | configuración editable sin reconstruir |
 
-Tras editar `dis.yaml`: `docker compose restart dis`.
+Tras editar `dis.yaml` no hace falta reiniciar: Dis lo recarga solo (ver
+[Añadir un servicio](#añadir-un-servicio)). Excepción: el compose monta un único fichero, y si
+tu editor guarda sustituyéndolo (vim, algunos IDE) el contenedor sigue viendo el antiguo; en ese
+caso, `docker compose restart dis`.
 
 > **Sobre el socket de Docker**: el `:ro` protege el fichero, no la API. Cualquiera que
 > controle el proceso de Dis podría hablar con Docker con permisos completos. Dis solo hace
@@ -116,6 +119,40 @@ cd backend && .venv/bin/ruff check . && .venv/bin/ruff format --check . && .venv
 cd frontend && npm run lint && npm run format:check && npm run build
 ```
 
+## Añadir un servicio
+
+Los contenedores de Docker **aparecen solos** (incluidos los parados). Lo que Dis no puede
+adivinar es su enlace, su descripción y de qué depende, y las herramientas propias que no son un
+contenedor (o que aún son una idea). Hay tres formas; el botón **+ Añadir** de la cabecera genera
+el fragmento de cualquiera de ellas, validado y listo para copiar:
+
+1. **Labels en el `docker-compose.yml` del servicio** (lo más cómodo para contenedores: el
+   servicio se describe a sí mismo y Dis no se toca). Tras `docker compose up -d`, aparece en
+   menos de 30 s.
+
+   ```yaml
+   services:
+     grafana:
+       image: grafana/grafana
+       labels:
+         dis.url: "http://{host}:3000"
+         dis.description: "Paneles de métricas"
+         dis.depends_on: "prometheus,minos-db"   # separadas por comas
+   ```
+
+2. **`containers:` en `dis.yaml`**, para contenedores cuyo compose no quieres tocar
+   (`url`, `description`, `depends_on`).
+3. **`tools:` en `dis.yaml`**, para herramientas propias (con fase `operational`,
+   `development` o `idea`). Si la herramienta corre en un contenedor que se llama igual que su
+   `id`, se enlazan solas.
+
+`dis.yaml` **se recarga solo** al guardarlo, sin reiniciar Dis. Si el YAML queda inválido, Dis
+sigue con la última versión buena y lo avisa en la cabecera (`⚠ dis.yaml`) y en el diálogo de
+**+ Añadir**, con el error.
+
+Dis no escribe la config por sí mismo: no tiene autenticación, y así sigue siendo de solo
+lectura.
+
 ## Configuración
 
 `dis.yaml` en la raíz, comentado. Resumen:
@@ -128,6 +165,7 @@ disks: [/]                   # puntos de montaje del host a mostrar
 containers:                  # metadatos de contenedores
   minos-adminer:
     url: "http://{host}:9080"
+    depends_on: [minos-db]   # aristas del grafo (como `edges`, pero junto al contenedor)
 
 tools:                       # herramientas propias
   - id: caronte
@@ -138,14 +176,14 @@ tools:                       # herramientas propias
     container: caronte       # opcional: hereda estado/métricas del contenedor
     depends_on: [minos-db]   # aristas del grafo
 
-edges:                       # dependencias extra entre contenedores
-  - { source: minos-adminer, target: minos-db }
+edges:                       # aristas sueltas entre dos nodos cualesquiera
+  - { source: minos, target: caronte }
 ```
 
 - `{host}` se sustituye por el host con el que accedes a Dis, así el mismo enlace funciona
   por la LAN y por Tailscale.
-- Un contenedor también puede declarar su enlace con labels: `dis.url` y `dis.description`,
-  que tienen prioridad sobre `dis.yaml`.
+- Un contenedor también puede declararse con labels: `dis.url`, `dis.description` y
+  `dis.depends_on` (separadas por comas), que tienen prioridad sobre `dis.yaml`.
 - Si una herramienta declara `container`, en el mapa herramienta y contenedor son un único
   nodo. Si no lo declara pero hay un contenedor que se llama igual que su `id` (p. ej.
   `caronte`), se enlazan automáticamente.
@@ -166,7 +204,7 @@ Variables de entorno (tienen prioridad sobre el YAML):
 
 | Método | Ruta | Devuelve |
 |---|---|---|
-| GET | `/api/containers` | lista con `id, name, image, status, ports, uptime_s, cpu_pct, mem_mb, url` |
+| GET | `/api/containers` | lista con `id, name, image, status, ports, uptime_s, cpu_pct, mem_mb, url, depends_on` |
 | GET | `/api/containers/{id}` | detalle: lo anterior + `env` (enmascarado), `labels`, `command` |
 | GET | `/api/containers/{id}/stats` | `cpu_pct, mem_mb, mem_limit_mb, net_rx_b, net_tx_b` |
 | GET | `/api/containers/{id}/logs` | `{lines}`: últimas 100 líneas |
@@ -174,6 +212,7 @@ Variables de entorno (tienen prioridad sobre el YAML):
 | GET | `/api/tools` | herramientas con `status` calculado |
 | GET | `/api/graph` | `{nodes, edges, docker_available}` |
 | GET | `/api/alerts` | proxy de Cerbero o `{connected: false}` |
+| GET | `/api/config` | `{path, loaded_at, error}`: estado de la última recarga de `dis.yaml` |
 | GET | `/api/health` | `{status: "ok"}` (healthcheck) |
 
 `{id}` acepta id o nombre del contenedor. Las variables de entorno cuyo nombre contiene

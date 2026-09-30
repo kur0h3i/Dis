@@ -1,6 +1,14 @@
 import { useCallback, useState } from 'react';
-import { useAlerts, useContainers, useResources, useTools } from './api/hooks';
+import {
+  useAlerts,
+  useConfigStatus,
+  useContainers,
+  useRefreshOnConfigReload,
+  useResources,
+  useTools,
+} from './api/hooks';
 import type { Selection } from './api/types';
+import { AddServiceDialog } from './components/AddServiceDialog';
 import { ServicePanel } from './components/ServicePanel';
 import { useTheme } from './lib/theme';
 import { DashboardView } from './views/DashboardView';
@@ -12,11 +20,14 @@ export default function App() {
   const [theme, toggleTheme] = useTheme();
   const [view, setView] = useState<View>('dashboard');
   const [selection, setSelection] = useState<Selection | null>(null);
+  const [adding, setAdding] = useState(false);
 
   const resources = useResources();
   const containers = useContainers();
   const tools = useTools();
   const alerts = useAlerts();
+  const config = useConfigStatus();
+  useRefreshOnConfigReload(config.data?.loaded_at);
   const closePanel = useCallback(() => setSelection(null), []);
 
   return (
@@ -61,6 +72,27 @@ export default function App() {
             ))}
           </nav>
 
+          {config.data?.error && (
+            <button
+              type="button"
+              onClick={() => setAdding(true)}
+              title={`dis.yaml no se pudo recargar: ${config.data.error}`}
+              className="font-mono text-[11px] text-[#ef4444] hover:underline"
+            >
+              ⚠ dis.yaml
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={() => setAdding(true)}
+            className="rounded-lg border border-line bg-surface px-2.5 py-1.5 font-mono text-xs text-muted hover:text-ink"
+            aria-label="Añadir servicio"
+            title="Añadir servicio"
+          >
+            +<span className="hidden sm:inline"> Añadir</span>
+          </button>
+
           <button
             type="button"
             onClick={toggleTheme}
@@ -97,6 +129,14 @@ export default function App() {
         onSelect={setSelection}
         onClose={closePanel}
       />
+
+      {adding && (
+        <AddServiceDialog
+          tools={tools.data}
+          containers={containers.data}
+          onClose={() => setAdding(false)}
+        />
+      )}
     </div>
   );
 }
