@@ -77,3 +77,16 @@ body {
   outline: 2px solid var(--accent-2);
   outline-offset: 2px;
 }
+
+/* React Flow con los tokens de Dis. */
+.react-flow {
+  --xy-background-color: var(--bg);
+  --xy-node-background-color: var(--surface);
+  --xy-controls-button-background-color: var(--surface);
+  --xy-controls-button-background-color-hover: var(--surface-2);
+  --xy-controls-button-color: var(--muted);
+  --xy-controls-button-color-hover: var(--text);
+  --xy-controls-button-border-color: var(--border);
+  --xy-minimap-background-color: var(--surface);
+  --xy-edge-label-background-color: var(--surface);
+}

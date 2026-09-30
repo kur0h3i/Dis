@@ -4,6 +4,7 @@ import type { Selection } from './api/types';
 import { ServicePanel } from './components/ServicePanel';
 import { useTheme } from './lib/theme';
 import { DashboardView } from './views/DashboardView';
+import { MapView } from './views/MapView';
 
 type View = 'dashboard' | 'map';
 
@@ -19,9 +20,9 @@ export default function App() {
   const closePanel = useCallback(() => setSelection(null), []);
 
   return (
-    <div className="flex h-full flex-col">
-      <header className="sticky top-0 z-30 border-b border-line bg-bg/85 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3 sm:px-6">
+    <div className="flex min-h-full flex-col">
+      <header className="sticky top-0 z-30 h-14 border-b border-line bg-bg/85 backdrop-blur">
+        <div className="mx-auto flex h-full max-w-7xl items-center gap-4 px-4 sm:px-6">
           <div className="flex items-baseline gap-2">
             <span className="font-mono text-lg font-bold tracking-[0.3em] text-accent-ink">
               DIS
@@ -79,7 +80,9 @@ export default function App() {
             onSelect={setSelection}
           />
         ) : (
-          <div className="p-6 font-mono text-sm text-faint">Mapa de servicios — pendiente.</div>
+          <div className="h-[calc(100dvh-3.5rem)]">
+            <MapView theme={theme} selection={selection} onSelect={setSelection} />
+          </div>
         )}
       </main>
 
