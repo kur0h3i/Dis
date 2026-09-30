@@ -14,15 +14,20 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from . import docker_service
+from .cerbero import fetch_alerts
 from .config import Settings, get_settings, resolve_url
 from .docker_service import ContainerNotFoundError, DockerUnavailableError
+from .ecosystem import build_graph, build_tools
 from .host_service import HostSampler, get_resources
 from .models import (
+    Alerts,
     ContainerDetail,
     ContainerLogs,
     ContainerStats,
     ContainerSummary,
+    Graph,
     Resources,
+    Tool,
 )
 
 logging.basicConfig(level=os.environ.get("DIS_LOG_LEVEL", "INFO"))
@@ -105,6 +110,33 @@ def container_logs(container_id: str) -> ContainerLogs:
 
 # TODO: POST /api/containers/{id}/{start|stop|restart} — fuera del MVP; necesita
 # autenticación antes de exponer acciones de escritura (ver docker_service.py).
+# TODO: autenticación de Dis (hoy se confía en la LAN/tailnet).
+
+
+# --- Ecosistema -------------------------------------------------------------
+
+
+def _containers_or_none(settings: Settings) -> list[ContainerSummary] | None:
+    """Lista sin stats (rápida). ``None`` si Docker no está disponible."""
+    try:
+        return docker_service.list_containers(settings, with_stats=False)
+    except DockerUnavailableError:
+        return None
+
+
+@app.get("/api/tools", response_model=list[Tool])
+def tools(request: Request, settings: SettingsDep) -> list[Tool]:
+    return build_tools(settings, _containers_or_none(settings), _request_host(request))
+
+
+@app.get("/api/graph", response_model=Graph)
+def graph(request: Request, settings: SettingsDep) -> Graph:
+    return build_graph(settings, _containers_or_none(settings), _request_host(request))
+
+
+@app.get("/api/alerts", response_model=Alerts)
+async def alerts(settings: SettingsDep) -> Alerts:
+    return await fetch_alerts(settings)
 
 
 # --- Frontend compilado -----------------------------------------------------
