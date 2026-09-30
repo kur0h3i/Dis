@@ -10,12 +10,20 @@ from pathlib import Path
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from .config import Settings, get_settings
+from . import docker_service
+from .config import Settings, get_settings, resolve_url
+from .docker_service import ContainerNotFoundError, DockerUnavailableError
 from .host_service import HostSampler, get_resources
-from .models import Resources
+from .models import (
+    ContainerDetail,
+    ContainerLogs,
+    ContainerStats,
+    ContainerSummary,
+    Resources,
+)
 
 logging.basicConfig(level=os.environ.get("DIS_LOG_LEVEL", "INFO"))
 
@@ -36,8 +44,22 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 app = FastAPI(title="Dis", version="0.1.0", lifespan=lifespan)
 
 
+@app.exception_handler(DockerUnavailableError)
+def _docker_unavailable(_: Request, exc: DockerUnavailableError) -> JSONResponse:
+    return JSONResponse(status_code=503, content={"detail": f"Docker no disponible: {exc}"})
+
+
+@app.exception_handler(ContainerNotFoundError)
+def _container_not_found(_: Request, exc: ContainerNotFoundError) -> JSONResponse:
+    return JSONResponse(status_code=404, content={"detail": f"Contenedor no encontrado: {exc}"})
+
+
 def get_sampler(request: Request) -> HostSampler:
     return request.app.state.sampler
+
+
+def _request_host(request: Request) -> str | None:
+    return request.url.hostname
 
 
 @app.get("/api/health")
@@ -50,6 +72,39 @@ def resources(
     settings: SettingsDep, sampler: Annotated[HostSampler, Depends(get_sampler)]
 ) -> Resources:
     return get_resources(sampler, settings)
+
+
+# --- Docker -----------------------------------------------------------------
+
+
+@app.get("/api/containers", response_model=list[ContainerSummary])
+def containers(request: Request, settings: SettingsDep) -> list[ContainerSummary]:
+    items = docker_service.list_containers(settings)
+    host = _request_host(request)
+    for c in items:
+        c.url = resolve_url(c.url, host, settings)
+    return items
+
+
+@app.get("/api/containers/{container_id}", response_model=ContainerDetail)
+def container_detail(container_id: str, request: Request, settings: SettingsDep) -> ContainerDetail:
+    detail = docker_service.get_container(container_id, settings)
+    detail.url = resolve_url(detail.url, _request_host(request), settings)
+    return detail
+
+
+@app.get("/api/containers/{container_id}/stats", response_model=ContainerStats)
+def container_stats(container_id: str) -> ContainerStats:
+    return docker_service.get_stats(container_id)
+
+
+@app.get("/api/containers/{container_id}/logs", response_model=ContainerLogs)
+def container_logs(container_id: str) -> ContainerLogs:
+    return ContainerLogs(lines=docker_service.get_logs(container_id))
+
+
+# TODO: POST /api/containers/{id}/{start|stop|restart} — fuera del MVP; necesita
+# autenticación antes de exponer acciones de escritura (ver docker_service.py).
 
 
 # --- Frontend compilado -----------------------------------------------------
