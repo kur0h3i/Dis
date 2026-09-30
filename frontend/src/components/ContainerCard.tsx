@@ -1,4 +1,5 @@
 import type { ContainerSummary } from '../api/types';
+import { clickableProps } from '../lib/a11y';
 import { formatMb, formatPct, formatPort, formatUptime, STATUS_LABEL } from '../lib/format';
 import { ExternalLink } from './ExternalLink';
 import { StatusDot } from './StatusDot';
@@ -13,10 +14,10 @@ export function ContainerCard({ container: c, onSelect, selected = false }: Prop
   const running = c.status === 'running' || c.status === 'unhealthy';
   const published = c.ports.filter((p) => p.host_port);
   return (
-    <button
-      type="button"
-      onClick={() => onSelect(c.name)}
-      className={`group flex w-full flex-col gap-3 rounded-lg border bg-surface p-4 text-left transition-colors hover:border-accent/60 ${
+    <div
+      data-dis-selectable
+      {...clickableProps(() => onSelect(c.name))}
+      className={`group flex w-full cursor-pointer flex-col gap-3 rounded-lg border bg-surface p-4 text-left transition-colors hover:border-accent/60 ${
         selected ? 'border-accent' : 'border-line'
       } ${running ? '' : 'opacity-70'}`}
     >
@@ -69,6 +70,6 @@ export function ContainerCard({ container: c, onSelect, selected = false }: Prop
           ↑ {formatUptime(c.uptime_s)}
         </span>
       </div>
-    </button>
+    </div>
   );
 }

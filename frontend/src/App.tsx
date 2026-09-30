@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useAlerts, useContainers, useResources, useTools } from './api/hooks';
 import type { Selection } from './api/types';
+import { ServicePanel } from './components/ServicePanel';
 import { useTheme } from './lib/theme';
 import { DashboardView } from './views/DashboardView';
 
@@ -15,6 +16,7 @@ export default function App() {
   const containers = useContainers();
   const tools = useTools();
   const alerts = useAlerts();
+  const closePanel = useCallback(() => setSelection(null), []);
 
   return (
     <div className="flex h-full flex-col">
@@ -80,6 +82,14 @@ export default function App() {
           <div className="p-6 font-mono text-sm text-faint">Mapa de servicios — pendiente.</div>
         )}
       </main>
+
+      <ServicePanel
+        selection={selection}
+        tools={tools.data}
+        containers={containers.data}
+        onSelect={setSelection}
+        onClose={closePanel}
+      />
     </div>
   );
 }

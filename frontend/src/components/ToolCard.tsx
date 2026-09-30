@@ -1,4 +1,5 @@
 import type { Tool } from '../api/types';
+import { clickableProps } from '../lib/a11y';
 import { STATUS_LABEL } from '../lib/format';
 import { ExternalLink } from './ExternalLink';
 import { StatusDot } from './StatusDot';
@@ -44,12 +45,12 @@ export function ToolCard({ tool: t, onSelect }: Props) {
     );
   }
   return (
-    <button
-      type="button"
-      onClick={() => onSelect(t.id)}
-      className={`${base} transition-colors hover:border-accent/60`}
+    <div
+      data-dis-selectable
+      {...clickableProps(() => onSelect(t.id))}
+      className={`${base} cursor-pointer transition-colors hover:border-accent/60`}
     >
       {body}
-    </button>
+    </div>
   );
 }
