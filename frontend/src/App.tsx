@@ -8,6 +8,7 @@ import {
   useTools,
 } from './api/hooks';
 import type { Selection } from './api/types';
+import logo from './assets/dis-logo.svg';
 import { AddServiceDialog } from './components/AddServiceDialog';
 import { ServicePanel } from './components/ServicePanel';
 import { useTheme } from './lib/theme';
@@ -38,7 +39,9 @@ export default function App() {
         className="sticky top-0 z-30 h-14 border-b border-line bg-bg/85 backdrop-blur"
       >
         <div className="mx-auto flex h-full max-w-7xl items-center gap-4 px-4 sm:px-6">
-          <div className="flex items-baseline gap-2">
+          <div className="flex items-center gap-2">
+            {/* La ciudad de Dis del Infierno de Dante: murallas al rojo sobre la Estigia. */}
+            <img src={logo} alt="" className="h-8 w-8" />
             <span className="font-mono text-lg font-bold tracking-[0.3em] text-accent-ink">
               DIS
             </span>

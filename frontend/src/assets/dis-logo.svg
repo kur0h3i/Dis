@@ -27,7 +27,6 @@
       <stop offset="1" stop-color="#ea580c"/>
     </linearGradient>
   </defs>
-  <rect width="64" height="64" rx="12" fill="#0a0a0a"/>
   <!-- «Il foco etterno ch'entro l'affoca le dimostra rosse» (Inf. VIII, 73-74). -->
   <circle cx="32" cy="28" r="30" fill="url(#dis-glow)"/>
   <path fill="url(#dis-fire)" transform="translate(15.25 10) scale(1.05 1.05)" d="M5 0C6 4 10 7 10 12.5 10 17 7.5 20 5 20 2.5 20 0 17.5 0 13.5 0 10.5 2 9 2.5 6.5c1 2 2 2.5 2.3 1.5C5.3 6 5.2 3 5 0z"/><path fill="url(#dis-fire)" transform="translate(48.75 10) scale(-1.05 1.05)" d="M5 0C6 4 10 7 10 12.5 10 17 7.5 20 5 20 2.5 20 0 17.5 0 13.5 0 10.5 2 9 2.5 6.5c1 2 2 2.5 2.3 1.5C5.3 6 5.2 3 5 0z"/>

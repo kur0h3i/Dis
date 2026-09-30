@@ -1,11 +1,15 @@
-# Dis
+<p align="center">
+  <img src="frontend/src/assets/dis-logo.svg" alt="Logo de Dis: una ciudad amurallada en llamas sobre la laguna Estigia" width="128">
+</p>
+
+<h1 align="center">Dis</h1>
 
 Dashboard para un servidor casero con Docker: todos los contenedores, tus herramientas propias
 y el estado de la máquina en una sola página, con acceso directo a cada servicio y un mapa de
 cómo dependen unos de otros. Sustituye a Homepage en **server-kuro**.
 
 > Dis es la ciudad amurallada que separa el Infierno superior del inferior; aquí es la puerta
-> de entrada a todo lo que corre en el servidor.
+> de entrada a todo lo que corre en el servidor ([por qué el nombre](#el-nombre-y-el-logo)).
 
 ![Dashboard de Dis](docs/dashboard.png)
 
@@ -33,6 +37,7 @@ cómo dependen unos de otros. Sustituye a Homepage en **server-kuro**.
 - [Solución de problemas](#solución-de-problemas)
 - [Desarrollo](#desarrollo)
 - [API](#api)
+- [El nombre y el logo](#el-nombre-y-el-logo)
 
 ## Puesta en marcha
 
@@ -310,6 +315,23 @@ Todas son `GET` y devuelven JSON. `{id}` acepta el id o el nombre del contenedor
 
 Estados: `running` (verde), `stopped` (gris), `restarting`/`paused` (amarillo), `unhealthy`
 (rojo). Las herramientas añaden `development` e `idea` (gris, borde discontinuo en el mapa).
+
+## El nombre y el logo
+
+> *Lo buon maestro disse: «Omai, figliuolo,*
+> *s'appressa la città c'ha nome Dite».*
+>
+> — Dante, *Infierno*, VIII, 67-68
+
+Dite (Dis) es la ciudad amurallada del *Infierno* de Dante: separa el Infierno superior del
+inferior, como este panel es la entrada a todo lo que corre en el servidor. El logo dibuja lo
+que ve Dante al llegar en el Canto VIII:
+
+- **Las murallas «que parecían de hierro»** (v. 78), en el violeta de Dis y con el borde al
+  rojo vivo.
+- **El fuego eterno** que arde dentro y enrojece la ciudad (vv. 73-74).
+- **La puerta** que los ángeles caídos cierran en la cara a Virgilio (vv. 115-117).
+- **La laguna Estigia**, que Dante y Virgilio cruzan en la barca de Flegias para llegar.
 
 ## Hoja de ruta
 
