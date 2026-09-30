@@ -1,17 +1,20 @@
 import { useState } from 'react';
-import { mockAlerts, mockContainers, mockResources, mockTools } from './api/mock';
+import { useAlerts, useContainers, useResources, useTools } from './api/hooks';
 import type { Selection } from './api/types';
 import { useTheme } from './lib/theme';
 import { DashboardView } from './views/DashboardView';
 
 type View = 'dashboard' | 'map';
 
-const ok = <T,>(data: T) => ({ data, error: null, isLoading: false });
-
 export default function App() {
   const [theme, toggleTheme] = useTheme();
   const [view, setView] = useState<View>('dashboard');
   const [selection, setSelection] = useState<Selection | null>(null);
+
+  const resources = useResources();
+  const containers = useContainers();
+  const tools = useTools();
+  const alerts = useAlerts();
 
   return (
     <div className="flex h-full flex-col">
@@ -24,7 +27,18 @@ export default function App() {
             <span className="hidden font-mono text-xs text-faint sm:inline">server-kuro</span>
           </div>
 
-          <nav className="ml-auto flex rounded-lg border border-line bg-surface p-0.5 font-mono text-xs">
+          <span
+            className="ml-auto hidden items-center gap-1.5 font-mono text-[11px] text-faint sm:inline-flex"
+            title={resources.error?.message}
+          >
+            <span
+              className="h-1.5 w-1.5 rounded-full"
+              style={{ backgroundColor: resources.error ? '#ef4444' : '#22c55e' }}
+            />
+            {resources.error ? 'sin conexión con la API' : 'en vivo'}
+          </span>
+
+          <nav className="ml-auto sm:ml-0 flex rounded-lg border border-line bg-surface p-0.5 font-mono text-xs">
             {(['dashboard', 'map'] as const).map((v) => (
               <button
                 key={v}
@@ -55,10 +69,10 @@ export default function App() {
       <main className="flex-1">
         {view === 'dashboard' ? (
           <DashboardView
-            resources={ok(mockResources)}
-            containers={ok(mockContainers)}
-            tools={ok(mockTools)}
-            alerts={ok(mockAlerts)}
+            resources={resources}
+            containers={containers}
+            tools={tools}
+            alerts={alerts}
             selection={selection}
             onSelect={setSelection}
           />
