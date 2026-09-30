@@ -243,9 +243,10 @@ export function AddServiceDialog({ tools, containers, onClose }: Props) {
               Añadir servicio
             </h2>
             <p className="text-sm text-muted">
-              Los contenedores de Docker aparecen solos. Aquí generas lo que Dis no puede adivinar:
-              enlace, descripción y dependencias, o una herramienta propia (aunque aún sea una
-              idea).
+              Dis ya detecta solo los contenedores, su enlace (por el puerto publicado) y sus
+              dependencias (el depends_on de Compose). Aquí generas lo que no acierte o no pueda
+              saber: enlace, descripción y dependencias, o una herramienta propia (aunque aún sea
+              una idea).
             </p>
           </div>
           <button

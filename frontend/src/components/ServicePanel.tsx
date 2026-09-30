@@ -141,10 +141,45 @@ function Logs({ name }: { name: string }) {
   );
 }
 
-function ContainerSections({ detail }: { detail: ContainerDetail }) {
+function ContainerSections({
+  detail,
+  tools,
+  onSelect,
+}: {
+  detail: ContainerDetail;
+  tools: Tool[] | undefined;
+  onSelect: (s: Selection) => void;
+}) {
   const running = detail.status === 'running' || detail.status === 'unhealthy';
+  const urlDetected = detail.detected.includes('url');
   return (
     <>
+      {detail.depends_on.length > 0 && (
+        <Section title="Depende de">
+          <div className="flex flex-wrap items-center gap-1 font-mono text-xs">
+            {detail.depends_on.map((dep) => (
+              <button
+                key={dep}
+                type="button"
+                onClick={() =>
+                  onSelect(
+                    tools?.some((t) => t.id === dep)
+                      ? { kind: 'tool', id: dep }
+                      : { kind: 'container', name: dep },
+                  )
+                }
+                className="rounded bg-surface-2 px-1.5 text-accent-ink hover:underline"
+              >
+                {dep}
+              </button>
+            ))}
+            {detail.detected.includes('depends_on') && (
+              <span className="text-[11px] text-faint">· incluye el depends_on de Compose</span>
+            )}
+          </div>
+        </Section>
+      )}
+
       <Section title="Métricas en tiempo real">
         <LiveMetrics name={detail.name} running={running} />
       </Section>
@@ -218,6 +253,11 @@ function ContainerSections({ detail }: { detail: ContainerDetail }) {
             <ExternalLink href={detail.url} label="Abrir UI" />
           ) : (
             <span className="text-sm text-faint">Sin UI web configurada.</span>
+          )}
+          {urlDetected && (
+            <span className="self-center font-mono text-[11px] text-faint">
+              enlace deducido del puerto publicado · fíjalo con el label dis.url
+            </span>
           )}
           {/* TODO: start / stop / restart — fuera del MVP. Necesita el endpoint
               POST /api/containers/{id}/{accion} (ver docker_service.py) y auth. */}
@@ -307,7 +347,7 @@ function PanelBody({ selection, tools, containers, onSelect }: Omit<Props, 'onCl
       {known && !d && !detail.error && (
         <div className="h-40 animate-pulse rounded-lg border border-line bg-surface-2" />
       )}
-      {d && <ContainerSections detail={d} />}
+      {d && <ContainerSections detail={d} tools={tools} onSelect={onSelect} />}
     </div>
   );
 }

@@ -10,6 +10,9 @@ RUN npm run build
 
 # --- 2. API + estáticos ------------------------------------------------------
 FROM python:3.12-slim
+# Metadatos OCI: Dis (y otros paneles) los usan como descripción del contenedor.
+LABEL org.opencontainers.image.title="Dis" \
+      org.opencontainers.image.description="Dashboard de contenedores y servicios del servidor"
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \

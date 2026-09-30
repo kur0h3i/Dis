@@ -63,6 +63,17 @@ class ContainerConfig(BaseModel):
     depends_on: list[str] = Field(default_factory=list)
 
 
+class AutodetectConfig(BaseModel):
+    """Qué completa Dis por su cuenta cuando un contenedor no lo declara."""
+
+    # Enlace a partir del primer puerto web publicado.
+    urls: bool = True
+    # Descripción a partir de las labels OCI de la imagen.
+    descriptions: bool = True
+    # Aristas del grafo a partir del ``depends_on`` de Docker Compose.
+    dependencies: bool = True
+
+
 class EdgeConfig(BaseModel):
     source: str
     target: str
@@ -76,8 +87,17 @@ class Settings(BaseModel):
     containers: dict[str, ContainerConfig] = Field(default_factory=dict)
     tools: list[ToolConfig] = Field(default_factory=list)
     edges: list[EdgeConfig] = Field(default_factory=list)
+    autodetect: AutodetectConfig = Field(default_factory=AutodetectConfig)
     # Ruta del YAML cargado (informativo).
     config_path: str | None = None
+
+    @field_validator("autodetect", mode="before")
+    @classmethod
+    def _autodetect_shorthand(cls, v: object) -> object:
+        # ``autodetect: false`` (o ``true``) activa o desactiva todo de golpe.
+        if isinstance(v, bool):
+            return {"urls": v, "descriptions": v, "dependencies": v}
+        return {} if v is None else v
 
     def tool_for_container(self, container_name: str) -> ToolConfig | None:
         for tool in self.tools:

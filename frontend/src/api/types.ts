@@ -25,6 +25,8 @@ export interface ContainerSummary {
   url: string | null;
   description: string | null;
   depends_on: string[];
+  /** Campos deducidos por Dis (puerto publicado, labels OCI, depends_on de Compose). */
+  detected: ('url' | 'description' | 'depends_on')[];
 }
 
 export interface EnvVar {

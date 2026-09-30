@@ -16,6 +16,12 @@ import docker
 from docker.errors import DockerException, NotFound
 from docker.models.containers import Container
 
+from .autodetect import (
+    compose_dependencies,
+    compose_service,
+    guess_description,
+    guess_url,
+)
 from .config import Settings
 from .models import (
     ContainerDetail,
@@ -145,6 +151,10 @@ def _image_name(container: Container) -> str:
     return container.attrs.get("Config", {}).get("Image") or ""
 
 
+def _labels(container: Container) -> dict[str, str]:
+    return container.attrs.get("Config", {}).get("Labels") or {}
+
+
 def _summary(container: Container, settings: Settings) -> dict[str, Any]:
     attrs = container.attrs
     state = attrs.get("State", {})
@@ -155,10 +165,29 @@ def _summary(container: Container, settings: Settings) -> dict[str, Any]:
     if raw_state == "running" and started:
         uptime = max(0, int((datetime.now(UTC) - started).total_seconds()))
 
-    labels = attrs.get("Config", {}).get("Labels") or {}
+    labels = _labels(container)
     meta = settings.containers.get(container.name)
-    url = labels.get(LABEL_URL) or (meta.url if meta else None)
+    auto = settings.autodetect
+    ports = parse_ports(attrs.get("NetworkSettings", {}).get("Ports"))
+    detected: list[str] = []
+
+    # URL: label > dis.yaml > puerto publicado. Un ``dis.url: ""`` (o ``url: null``
+    # en dis.yaml) deja el contenedor sin enlace, también sin el automático.
+    if LABEL_URL in labels:
+        url = labels[LABEL_URL].strip() or None
+    elif meta is not None and "url" in meta.model_fields_set:
+        url = meta.url or None
+    else:
+        url = guess_url(ports) if auto.urls else None
+        if url:
+            detected.append("url")
+
     description = labels.get(LABEL_DESCRIPTION) or (meta.description if meta else None)
+    if not description and auto.descriptions:
+        description = guess_description(labels)
+        if description:
+            detected.append("description")
+
     if LABEL_DEPENDS_ON in labels:
         depends_on = [d.strip() for d in labels[LABEL_DEPENDS_ON].split(",") if d.strip()]
     else:
@@ -171,12 +200,39 @@ def _summary(container: Container, settings: Settings) -> dict[str, Any]:
         "status": normalize_status(raw_state, health),
         "state": raw_state,
         "health": health,
-        "ports": parse_ports(attrs.get("NetworkSettings", {}).get("Ports")),
+        "ports": ports,
         "uptime_s": uptime,
         "url": url,
         "description": description,
         "depends_on": depends_on,
+        "detected": detected,
     }
+
+
+def _compose_names(containers: list[Container]) -> dict[tuple[str, str], str]:
+    """(proyecto, servicio) de Compose → nombre del contenedor (la 1.ª réplica)."""
+    names: dict[tuple[str, str], str] = {}
+    for c in containers:
+        key = compose_service(_labels(c))
+        if key:
+            names.setdefault(key, c.name)
+    return names
+
+
+def _add_compose_dependencies(
+    summary: dict[str, Any], container: Container, names: dict[tuple[str, str], str]
+) -> None:
+    """Suma a ``depends_on`` el ``depends_on`` de Compose, traducido de nombre de
+    servicio a nombre de contenedor (``db`` → ``minos-db``)."""
+    labels = _labels(container)
+    key = compose_service(labels)
+    if key is None:
+        return
+    found = [names[(key[0], svc)] for svc in compose_dependencies(labels) if (key[0], svc) in names]
+    new = [name for name in found if name not in summary["depends_on"]]
+    if new:
+        summary["depends_on"] = [*summary["depends_on"], *new]
+        summary["detected"].append("depends_on")
 
 
 # --- Stats ------------------------------------------------------------------
@@ -232,6 +288,10 @@ def list_containers(settings: Settings, with_stats: bool = True) -> list[Contain
         raise DockerUnavailableError(str(exc)) from exc
 
     summaries = [_summary(c, settings) for c in containers]
+    if settings.autodetect.dependencies:
+        names = _compose_names(containers)
+        for summary, c in zip(summaries, containers, strict=True):
+            _add_compose_dependencies(summary, c, names)
 
     if with_stats:
         running = [(i, c) for i, c in enumerate(containers) if c.status == "running"]
@@ -258,8 +318,16 @@ def get_container(id_or_name: str, settings: Settings) -> ContainerDetail:
     attrs = container.attrs
     config = attrs.get("Config", {})
     cmd = config.get("Cmd")
+    summary = _summary(container, settings)
+    compose = compose_service(_labels(container))
+    if compose and settings.autodetect.dependencies:
+        # Solo hacen falta los contenedores del mismo proyecto de Compose.
+        siblings = get_client().containers.list(
+            all=True, filters={"label": f"com.docker.compose.project={compose[0]}"}
+        )
+        _add_compose_dependencies(summary, container, _compose_names(siblings))
     return ContainerDetail(
-        **_summary(container, settings),
+        **summary,
         created=attrs.get("Created"),
         started_at=attrs.get("State", {}).get("StartedAt"),
         command=" ".join(cmd) if isinstance(cmd, list) else cmd,

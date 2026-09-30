@@ -49,12 +49,15 @@ def build_tools(
     tools: list[Tool] = []
     for t in settings.tools:
         container = linked_container(t, settings, by_name)
+        summary = by_name.get(container) if by_name is not None and container else None
+        # Sin URL propia, la del contenedor (declarada o detectada por su puerto).
+        url = t.url or (summary.url if summary else None)
         tools.append(
             Tool(
                 id=t.id,
                 name=t.name,
                 description=t.description,
-                url=None if t.self else resolve_url(t.url, request_host, settings),
+                url=None if t.self else resolve_url(url, request_host, settings),
                 status=tool_status(t, container, by_name),
                 stage=t.stage,
                 depends_on=t.depends_on,

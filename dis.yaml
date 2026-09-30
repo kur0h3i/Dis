@@ -16,6 +16,14 @@ public_host: null
 disks:
   - /
 
+# Qué deduce Dis por su cuenta a partir de Docker. Todo activado por defecto y
+# lo declarado a mano (labels dis.* o este fichero) siempre manda.
+# `autodetect: false` lo desactiva todo de golpe.
+autodetect:
+  urls: true          # enlace = primer puerto web publicado (no BD ni 127.0.0.1)
+  descriptions: true  # descripción = labels OCI de la imagen
+  dependencies: true  # aristas = depends_on de Docker Compose
+
 # Metadatos de contenedores Docker (url, description, depends_on). También se
 # pueden poner como labels en el propio contenedor: `dis.url`, `dis.description`
 # y `dis.depends_on` (separadas por comas); el label tiene prioridad.

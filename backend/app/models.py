@@ -36,8 +36,11 @@ class ContainerSummary(BaseModel):
     mem_mb: float | None = None
     url: str | None = None
     description: str | None = None
-    # Del label ``dis.depends_on`` o de ``containers.<nombre>.depends_on``.
+    # Del label ``dis.depends_on``, de ``containers.<nombre>.depends_on`` y, si
+    # está activado, del ``depends_on`` de Docker Compose.
     depends_on: list[str] = Field(default_factory=list)
+    # Campos que Dis ha deducido en vez de leerlos de la config (ver autodetect.py).
+    detected: list[Literal["url", "description", "depends_on"]] = Field(default_factory=list)
 
 
 class EnvVar(BaseModel):

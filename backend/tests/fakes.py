@@ -74,8 +74,12 @@ class _Containers:
     def __init__(self, items: list[FakeContainer]) -> None:
         self._items = items
 
-    def list(self, all: bool = False) -> list[FakeContainer]:
-        return list(self._items) if all else [c for c in self._items if c.status == "running"]
+    def list(self, all: bool = False, filters: dict | None = None) -> list[FakeContainer]:
+        items = list(self._items) if all else [c for c in self._items if c.status == "running"]
+        if filters and "label" in filters:
+            key, _, value = filters["label"].partition("=")
+            items = [c for c in items if c.attrs["Config"]["Labels"].get(key) == value]
+        return items
 
     def get(self, key: str) -> FakeContainer:
         for c in self._items:
