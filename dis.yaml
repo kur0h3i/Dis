@@ -26,7 +26,8 @@ containers:
 
 # Herramientas propias del ecosistema.
 #   stage: operational | development | idea
-#   container: nombre del contenedor que la implementa (opcional)
+#   container: nombre del contenedor que la implementa (opcional; si falta, se
+#              usa el contenedor que se llame igual que el id, si existe)
 #   depends_on: ids de herramientas o nombres de contenedores
 tools:
   - id: dis

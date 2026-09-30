@@ -7,6 +7,8 @@ from fastapi.testclient import TestClient
 from app import cerbero, docker_service
 from app.config import EdgeConfig, Settings, ToolConfig
 from app.docker_service import DockerUnavailableError
+from app.ecosystem import build_tools
+from app.models import ContainerSummary
 
 from .fakes import FakeClient, FakeContainer, default_containers
 
@@ -69,6 +71,45 @@ def test_graph(client: TestClient, fake_docker: FakeClient) -> None:
         ("minos-adminer", "minos-db"),
     }
     assert g["docker_available"] is True
+
+
+def test_tool_links_container_with_same_name(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Caronte no declara `container`, pero hay un contenedor "caronte": son lo
+    # mismo. Antes el contenedor pisaba al nodo de la herramienta en el grafo.
+    items = [*default_containers(), FakeContainer("caronte", state="exited")]
+    client_ = FakeClient(items)
+    monkeypatch.setattr(docker_service, "get_client", lambda: client_)
+
+    tools = {t["id"]: t for t in client.get("/api/tools").json()}
+    assert tools["caronte"]["container"] == "caronte"
+    assert tools["caronte"]["status"] == "stopped"  # hereda del contenedor
+
+    g = client.get("/api/graph").json()
+    caronte = [n for n in g["nodes"] if n["id"] == "caronte"]
+    assert len(caronte) == 1
+    assert caronte[0]["type"] == "tool" and caronte[0]["label"] == "Caronte"
+    assert caronte[0]["container"] == "caronte" and caronte[0]["status"] == "stopped"
+    assert {"source": "caronte", "target": "minos-db"} in g["edges"]
+
+
+def test_same_name_container_claimed_by_other_tool() -> None:
+    settings = Settings(
+        tools=[
+            ToolConfig(id="caronte", name="Caronte"),
+            ToolConfig(id="caronte-v2", name="Caronte v2", container="caronte"),
+        ]
+    )
+    containers = [
+        ContainerSummary(
+            id="c1", name="caronte", image="x", status="running", state="running", ports=[]
+        )
+    ]
+    tools = {t.id: t for t in build_tools(settings, containers, None)}
+    # Quien lo declara explícitamente se lo queda.
+    assert tools["caronte"].container is None
+    assert tools["caronte-v2"].container == "caronte"
 
 
 def test_graph_without_docker(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:

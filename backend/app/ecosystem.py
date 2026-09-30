@@ -1,8 +1,9 @@
 """Herramientas propias y grafo de servicios.
 
 Combina la config (herramientas, dependencias) con el estado real de Docker.
-Si una herramienta declara ``container``, herramienta y contenedor son el mismo
-nodo en el grafo: hereda estado y métricas del contenedor.
+Si una herramienta declara ``container`` (o hay un contenedor que se llama como
+su id), herramienta y contenedor son el mismo nodo en el grafo: hereda estado y
+métricas del contenedor.
 """
 
 from __future__ import annotations
@@ -11,14 +12,31 @@ from .config import Settings, ToolConfig, resolve_url
 from .models import ContainerSummary, Graph, GraphEdge, GraphNode, Tool, ToolStatus
 
 
-def tool_status(tool: ToolConfig, containers: dict[str, ContainerSummary] | None) -> ToolStatus:
+def linked_container(
+    tool: ToolConfig, settings: Settings, containers: dict[str, ContainerSummary] | None
+) -> str | None:
+    """Contenedor de la herramienta: el declarado o, si no declara ninguno, el que
+    se llama igual que su id (``caronte`` ↔ contenedor ``caronte``). Sin esto, ese
+    contenedor y la herramienta chocarían en el grafo por tener el mismo id."""
+    if tool.container:
+        return tool.container
+    if containers is None or tool.id not in containers:
+        return None
+    # Si otra herramienta ya lo reclama explícitamente, es suyo.
+    claimed = any(t.container == tool.id for t in settings.tools)
+    return None if claimed else tool.id
+
+
+def tool_status(
+    tool: ToolConfig, container: str | None, containers: dict[str, ContainerSummary] | None
+) -> ToolStatus:
     if tool.self:
         return "running"
     if tool.stage != "operational":
         return tool.stage
-    if tool.container and containers is not None:
-        container = containers.get(tool.container)
-        return container.status if container else "stopped"
+    if container and containers is not None:
+        summary = containers.get(container)
+        return summary.status if summary else "stopped"
     # Operativa sin contenedor asociado (o Docker caído): nos fiamos de la config.
     # TODO: health-check HTTP opcional por herramienta cuando Cerbero exista.
     return "running"
@@ -28,20 +46,23 @@ def build_tools(
     settings: Settings, containers: list[ContainerSummary] | None, request_host: str | None
 ) -> list[Tool]:
     by_name = {c.name: c for c in containers} if containers is not None else None
-    return [
-        Tool(
-            id=t.id,
-            name=t.name,
-            description=t.description,
-            url=None if t.self else resolve_url(t.url, request_host, settings),
-            status=tool_status(t, by_name),
-            stage=t.stage,
-            depends_on=t.depends_on,
-            container=t.container,
-            is_self=t.self,
+    tools: list[Tool] = []
+    for t in settings.tools:
+        container = linked_container(t, settings, by_name)
+        tools.append(
+            Tool(
+                id=t.id,
+                name=t.name,
+                description=t.description,
+                url=None if t.self else resolve_url(t.url, request_host, settings),
+                status=tool_status(t, container, by_name),
+                stage=t.stage,
+                depends_on=t.depends_on,
+                container=container,
+                is_self=t.self,
+            )
         )
-        for t in settings.tools
-    ]
+    return tools
 
 
 def build_graph(
