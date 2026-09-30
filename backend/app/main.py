@@ -15,12 +15,13 @@ from fastapi.staticfiles import StaticFiles
 
 from . import docker_service
 from .cerbero import fetch_alerts
-from .config import Settings, get_settings, resolve_url
+from .config import Settings, config_status, get_settings, resolve_url
 from .docker_service import ContainerNotFoundError, DockerUnavailableError
 from .ecosystem import build_graph, build_tools
 from .host_service import HostSampler, get_resources
 from .models import (
     Alerts,
+    ConfigStatus,
     ContainerDetail,
     ContainerLogs,
     ContainerStats,
@@ -70,6 +71,13 @@ def _request_host(request: Request) -> str | None:
 @app.get("/api/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/api/config", response_model=ConfigStatus)
+def config(_: SettingsDep) -> ConfigStatus:
+    # Depender de los settings fuerza la comprobación (y recarga) del YAML.
+    path, loaded_at, error = config_status()
+    return ConfigStatus(path=path, loaded_at=loaded_at, error=error)
 
 
 @app.get("/api/resources", response_model=Resources)

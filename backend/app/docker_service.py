@@ -37,6 +37,8 @@ ANSI_RE = re.compile(r"\x1b\[[0-9;?]*[ -/]*[@-~]")
 # Labels opcionales en los contenedores (tienen prioridad sobre dis.yaml).
 LABEL_URL = "dis.url"
 LABEL_DESCRIPTION = "dis.description"
+# Dependencias separadas por comas: ``dis.depends_on: "minos-db,caronte"``.
+LABEL_DEPENDS_ON = "dis.depends_on"
 
 
 class DockerUnavailableError(RuntimeError):
@@ -157,6 +159,10 @@ def _summary(container: Container, settings: Settings) -> dict[str, Any]:
     meta = settings.containers.get(container.name)
     url = labels.get(LABEL_URL) or (meta.url if meta else None)
     description = labels.get(LABEL_DESCRIPTION) or (meta.description if meta else None)
+    if LABEL_DEPENDS_ON in labels:
+        depends_on = [d.strip() for d in labels[LABEL_DEPENDS_ON].split(",") if d.strip()]
+    else:
+        depends_on = list(meta.depends_on) if meta else []
 
     return {
         "id": container.short_id,
@@ -169,6 +175,7 @@ def _summary(container: Container, settings: Settings) -> dict[str, Any]:
         "uptime_s": uptime,
         "url": url,
         "description": description,
+        "depends_on": depends_on,
     }
 
 

@@ -73,6 +73,27 @@ def test_graph(client: TestClient, fake_docker: FakeClient) -> None:
     assert g["docker_available"] is True
 
 
+def test_graph_edges_from_container_labels(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    items = [
+        *default_containers(),
+        FakeContainer("caronte", labels={"dis.depends_on": "minos-db"}),
+        FakeContainer("grafana", labels={"dis.depends_on": "prometheus"}),
+    ]
+    fake = FakeClient(items)
+    monkeypatch.setattr(docker_service, "get_client", lambda: fake)
+    g = client.get("/api/graph").json()
+    edges = {(e["source"], e["target"]) for e in g["edges"]}
+    # caronte es la herramienta (misma arista que su depends_on: no se duplica).
+    assert [e for e in g["edges"] if e["source"] == "caronte"] == [
+        {"source": "caronte", "target": "minos-db"}
+    ]
+    assert ("grafana", "prometheus") in edges
+    nodes = {n["id"]: n for n in g["nodes"]}
+    assert nodes["prometheus"]["status"] == "stopped"  # aún no existe: fantasma
+
+
 def test_tool_links_container_with_same_name(
     client: TestClient, monkeypatch: pytest.MonkeyPatch
 ) -> None:

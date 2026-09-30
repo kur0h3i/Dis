@@ -9,17 +9,25 @@ se pueden sobrescribir con variables de entorno:
 - ``DIS_HOST_ROOT``    dónde está montada la raíz del host (``/hostfs`` en Docker)
 - ``DIS_PUBLIC_HOST``  host con el que construir los enlaces (``{host}`` en las URLs)
 - ``DIS_DISKS``        puntos de montaje a mostrar, separados por comas (``/,/home``)
+
+El YAML se recarga solo cuando cambia (ver ``get_settings``): añadir un servicio
+no requiere reiniciar Dis.
 """
 
 from __future__ import annotations
 
+import logging
 import os
-from functools import lru_cache
+import threading
+import time
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
 import yaml
 from pydantic import BaseModel, Field, field_validator
+
+log = logging.getLogger(__name__)
 
 ToolStage = Literal["operational", "development", "idea"]
 
@@ -51,6 +59,8 @@ class ContainerConfig(BaseModel):
 
     url: str | None = None
     description: str | None = None
+    # Contenedores o herramientas de los que depende (aristas del grafo).
+    depends_on: list[str] = Field(default_factory=list)
 
 
 class EdgeConfig(BaseModel):
@@ -96,6 +106,8 @@ def load_settings(path: Path | None = None) -> Settings:
     if path is not None:
         with path.open(encoding="utf-8") as fh:
             data = yaml.safe_load(fh) or {}
+        if not isinstance(data, dict):
+            raise ValueError(f"{path}: se esperaba un mapa de claves (cerbero_url, tools...)")
         data["config_path"] = str(path)
 
     env_overrides = {
@@ -115,9 +127,66 @@ def load_settings(path: Path | None = None) -> Settings:
     return settings
 
 
-@lru_cache(maxsize=1)
+@dataclass
+class _Loaded:
+    # (ruta, mtime en ns) del YAML con el que se cargó; None si no hay fichero.
+    key: tuple[str | None, int | None]
+    settings: Settings
+    loaded_at: float
+    # Último intento fallido de recarga (se sigue sirviendo ``settings``).
+    error: str | None = None
+
+
+_loaded: _Loaded | None = None
+_lock = threading.Lock()
+
+
 def get_settings() -> Settings:
-    return load_settings()
+    """Config actual, recargada si el YAML ha cambiado desde la última lectura.
+
+    En cada petición solo se hace un ``stat`` del fichero. Si el YAML nuevo no es
+    válido se mantiene la última config buena y el error queda en
+    ``config_status()`` para mostrarlo en la UI. La primera carga sí falla.
+    """
+    global _loaded
+    with _lock:
+        try:
+            path = _find_config_file()
+            key = (str(path), path.stat().st_mtime_ns) if path else (None, None)
+        except OSError:
+            # El editor puede estar sustituyendo el fichero justo ahora.
+            if _loaded is None:
+                raise
+            return _loaded.settings
+        if _loaded is not None and _loaded.key == key:
+            return _loaded.settings
+        try:
+            settings = load_settings(path)
+        except (OSError, ValueError, yaml.YAMLError) as exc:
+            if _loaded is None:
+                raise
+            log.warning("Config no recargada (%s); se mantiene la anterior: %s", path, exc)
+            _loaded.key, _loaded.error = key, str(exc)
+            return _loaded.settings
+        if _loaded is not None:
+            log.info("Config recargada desde %s", path)
+        _loaded = _Loaded(key=key, settings=settings, loaded_at=time.time())
+        return settings
+
+
+def config_status() -> tuple[str | None, float | None, str | None]:
+    """(ruta, momento de la última carga buena, error de la última recarga)."""
+    with _lock:
+        if _loaded is None:
+            return None, None, None
+        return _loaded.key[0], _loaded.loaded_at, _loaded.error
+
+
+def reset_settings_cache() -> None:
+    """Olvida la config cargada (tests)."""
+    global _loaded
+    with _lock:
+        _loaded = None
 
 
 def resolve_url(url: str | None, request_host: str | None, settings: Settings) -> str | None:

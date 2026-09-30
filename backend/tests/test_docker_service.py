@@ -102,6 +102,23 @@ def test_list_containers_endpoint(client: TestClient, fake_docker: FakeClient) -
     assert old["status"] == "stopped" and old["cpu_pct"] is None and old["uptime_s"] is None
 
 
+def test_depends_on_from_label_or_config(
+    client: TestClient, settings: Settings, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    settings.containers["minos-db"] = ContainerConfig(depends_on=["backups"])
+    settings.containers["minos-adminer"].depends_on = ["ignorado"]
+    items = default_containers()
+    # El label tiene prioridad sobre dis.yaml.
+    items[1].attrs["Config"]["Labels"] = {"dis.depends_on": "minos-db, cache ,"}
+    fake = FakeClient(items)
+    monkeypatch.setattr(docker_service, "get_client", lambda: fake)
+
+    body = {c["name"]: c for c in client.get("/api/containers").json()}
+    assert body["minos-adminer"]["depends_on"] == ["minos-db", "cache"]
+    assert body["minos-db"]["depends_on"] == ["backups"]
+    assert body["old-job"]["depends_on"] == []
+
+
 def test_container_detail_masks_env(client: TestClient, fake_docker: FakeClient) -> None:
     r = client.get("/api/containers/minos-db")
     assert r.status_code == 200

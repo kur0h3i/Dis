@@ -101,6 +101,7 @@ def build_graph(
         )
 
     raw_edges = [(t.id, dep) for t in tools for dep in t.depends_on]
+    raw_edges += [(c.name, dep) for c in containers or [] for dep in c.depends_on]
     raw_edges += [(e.source, e.target) for e in settings.edges]
 
     edges: list[GraphEdge] = []

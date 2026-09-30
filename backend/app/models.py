@@ -36,6 +36,8 @@ class ContainerSummary(BaseModel):
     mem_mb: float | None = None
     url: str | None = None
     description: str | None = None
+    # Del label ``dis.depends_on`` o de ``containers.<nombre>.depends_on``.
+    depends_on: list[str] = Field(default_factory=list)
 
 
 class EnvVar(BaseModel):
@@ -120,6 +122,14 @@ class Graph(BaseModel):
     nodes: list[GraphNode]
     edges: list[GraphEdge]
     docker_available: bool = True
+
+
+class ConfigStatus(BaseModel):
+    """Estado de ``dis.yaml``, para avisar en la UI si la última edición falló."""
+
+    path: str | None = None
+    loaded_at: float | None = None
+    error: str | None = None
 
 
 class Alerts(BaseModel):

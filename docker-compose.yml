@@ -18,7 +18,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       # Raíz del host en solo lectura, para medir el uso de los discos.
       - /:/hostfs:ro
-      # Config editable sin reconstruir la imagen (reiniciar el contenedor).
+      # Config editable sin reconstruir la imagen; Dis la recarga sola al guardarla
+      # (si tu editor sustituye el fichero, p. ej. vim: docker compose restart dis).
       - ./dis.yaml:/app/dis.yaml:ro
     mem_limit: 150m
     cpus: 0.5

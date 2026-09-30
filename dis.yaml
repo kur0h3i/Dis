@@ -1,4 +1,5 @@
-# Configuración de Dis.
+# Configuración de Dis. Se recarga sola al guardar (no hace falta reiniciar);
+# el botón "+ Añadir" de Dis genera las entradas nuevas listas para pegar.
 #
 # `{host}` en cualquier URL se sustituye por el host con el que accedes a Dis
 # (IP de la LAN, nombre de Tailscale...), o por `public_host` si lo defines.
@@ -15,8 +16,9 @@ public_host: null
 disks:
   - /
 
-# Metadatos de contenedores Docker. También se puede usar el label `dis.url`
-# (y `dis.description`) en el propio contenedor; el label tiene prioridad.
+# Metadatos de contenedores Docker (url, description, depends_on). También se
+# pueden poner como labels en el propio contenedor: `dis.url`, `dis.description`
+# y `dis.depends_on` (separadas por comas); el label tiene prioridad.
 containers:
   minos-adminer:
     url: "http://{host}:9080"
