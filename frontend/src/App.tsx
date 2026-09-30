@@ -21,7 +21,11 @@ export default function App() {
 
   return (
     <div className="flex min-h-full flex-col">
-      <header className="sticky top-0 z-30 h-14 border-b border-line bg-bg/85 backdrop-blur">
+      {/* Seleccionable: cambiar de vista o de tema no cierra el panel lateral. */}
+      <header
+        data-dis-selectable
+        className="sticky top-0 z-30 h-14 border-b border-line bg-bg/85 backdrop-blur"
+      >
         <div className="mx-auto flex h-full max-w-7xl items-center gap-4 px-4 sm:px-6">
           <div className="flex items-baseline gap-2">
             <span className="font-mono text-lg font-bold tracking-[0.3em] text-accent-ink">

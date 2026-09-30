@@ -90,3 +90,12 @@ body {
   --xy-minimap-background-color: var(--surface);
   --xy-edge-label-background-color: var(--surface);
 }
+
+/* Aristas fuera del foco (hover, selección o búsqueda) del mapa. */
+.react-flow__edge {
+  transition: opacity 200ms;
+}
+
+.react-flow__edge.dis-edge-faded {
+  opacity: 0.15;
+}

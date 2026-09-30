@@ -10,8 +10,16 @@ servicio. Sustituye a Homepage.
 - **Dashboard**: recursos del servidor (CPU, RAM, discos con sparklines de 5 min), tarjetas de
   contenedores y de herramientas, alertas de Cerbero.
 - **Mapa**: canvas (React Flow) con un nodo por servicio y aristas de dependencia; las aristas
-  se vuelven naranjas si el destino está caído. Los nodos se arrastran y su posición se guarda
-  en `localStorage` (`dis_graph_positions`).
+  se vuelven naranjas si el destino está caído.
+  - Al pasar el ratón por un nodo (o al seleccionarlo) se resaltan sus dependencias y
+    dependientes y se atenúa el resto; si el panel lateral lo tapa, la vista se desplaza.
+  - Buscador (atajo `/`, ↑/↓ y Enter) por nombre, id, contenedor o descripción: centra el
+    servicio y abre su panel.
+  - Leyenda con recuento por estado que funciona como filtro (p. ej. ocultar las herramientas
+    en desarrollo/idea, que se dibujan con borde discontinuo); se recuerda en
+    `localStorage` (`dis_graph_hidden`).
+  - Los nodos se arrastran y su posición se guarda en `localStorage` (`dis_graph_positions`);
+    «Reordenar» vuelve al layout automático y encuadra el mapa.
 - **Panel de servicio**: al hacer clic en un contenedor o herramienta se abre un panel lateral
   con métricas en vivo (5 s), puertos, variables de entorno (credenciales enmascaradas) y los
   últimos 100 logs.
@@ -37,7 +45,7 @@ dis/
 │       ├── views/             DashboardView, MapView
 │       ├── components/        ServiceNode, ServicePanel, ContainerCard, ...
 │       ├── api/               tipos, cliente y hooks de react-query
-│       └── lib/               formato, tema, layout del grafo
+│       └── lib/               formato, tema, layout y foco/filtros del grafo
 ├── dis.yaml            configuración (herramientas, URLs, dependencias)
 ├── Dockerfile
 └── docker-compose.yml
@@ -139,7 +147,8 @@ edges:                       # dependencias extra entre contenedores
 - Un contenedor también puede declarar su enlace con labels: `dis.url` y `dis.description`,
   que tienen prioridad sobre `dis.yaml`.
 - Si una herramienta declara `container`, en el mapa herramienta y contenedor son un único
-  nodo.
+  nodo. Si no lo declara pero hay un contenedor que se llama igual que su `id` (p. ej.
+  `caronte`), se enlazan automáticamente.
 
 Variables de entorno (tienen prioridad sobre el YAML):
 

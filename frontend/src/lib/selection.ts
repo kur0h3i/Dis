@@ -6,9 +6,12 @@ export function selectionFor(node: GraphNode): Selection {
     : { kind: 'container', name: node.container ?? node.id };
 }
 
-export function sameSelection(a: Selection | null, b: Selection): boolean {
-  if (!a) return false;
-  if (a.kind === 'tool' && b.kind === 'tool') return a.id === b.id;
-  if (a.kind === 'container' && b.kind === 'container') return a.name === b.name;
-  return false;
+/**
+ * ¿Es este nodo el de la selección? Un contenedor seleccionado desde el
+ * dashboard también marca a la herramienta que lo absorbe en el mapa.
+ */
+export function nodeMatchesSelection(node: GraphNode, selection: Selection | null): boolean {
+  if (!selection) return false;
+  if (selection.kind === 'tool') return node.type === 'tool' && node.id === selection.id;
+  return node.container === selection.name;
 }

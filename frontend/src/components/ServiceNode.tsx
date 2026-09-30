@@ -11,6 +11,8 @@ export type ServiceNodeData = {
   node: GraphNode;
   container?: ContainerSummary;
   active: boolean;
+  /** Fuera del foco actual (hover, selección o búsqueda): se atenúa. */
+  dimmed: boolean;
   onDetail: (s: Selection) => void;
 };
 
@@ -18,7 +20,7 @@ export type ServiceFlowNode = Node<ServiceNodeData, 'service'>;
 
 /** Nodo del mapa: ventana flotante con el estado y las métricas del servicio. */
 function ServiceNodeImpl({ data, selected }: NodeProps<ServiceFlowNode>) {
-  const { node, container: c, active, onDetail } = data;
+  const { node, container: c, active, dimmed, onDetail } = data;
   const inactive = node.status === 'development' || node.status === 'idea';
   const running = node.status === 'running' || node.status === 'unhealthy';
 
@@ -26,13 +28,13 @@ function ServiceNodeImpl({ data, selected }: NodeProps<ServiceFlowNode>) {
     <div
       data-dis-selectable
       style={{ width: NODE_WIDTH }}
-      className={`overflow-hidden rounded-lg border bg-surface shadow-lg shadow-black/20 transition-colors ${
+      className={`overflow-hidden rounded-lg border bg-surface shadow-lg shadow-black/20 transition-[opacity,border-color,box-shadow] duration-200 ${
         active
           ? 'border-accent ring-2 ring-accent/30'
           : selected
             ? 'border-accent-2'
             : 'border-line'
-      } ${inactive ? 'opacity-55' : ''}`}
+      } ${inactive ? 'border-dashed' : ''} ${dimmed ? 'opacity-25' : inactive && !active ? 'opacity-55' : ''}`}
     >
       <Handle type="target" position={Position.Top} isConnectable={false} className="opacity-0!" />
 

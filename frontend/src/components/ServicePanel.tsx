@@ -20,8 +20,14 @@ interface Props {
   onClose: () => void;
 }
 
-/** Atributo para que un clic en tarjetas/nodos no cuente como "clic fuera". */
+/**
+ * Atributo para que un clic en tarjetas, nodos, la cabecera o la barra del mapa
+ * no cuente como "clic fuera".
+ */
 export const SELECTABLE_ATTR = 'data-dis-selectable';
+
+/** Ancho máximo del panel (px); el mapa lo usa para no dejar nodos debajo. */
+export const PANEL_MAX_WIDTH = 520;
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -349,7 +355,8 @@ export function ServicePanel({ selection, tools, containers, onSelect, onClose }
       ref={panelRef}
       aria-label="Detalle del servicio"
       aria-hidden={!open}
-      className={`fixed top-0 right-0 z-40 flex h-full w-full max-w-[520px] flex-col border-l border-line bg-surface shadow-2xl shadow-black/40 transition-[transform,visibility] duration-300 ease-out ${
+      style={{ maxWidth: PANEL_MAX_WIDTH }}
+      className={`fixed top-14 right-0 bottom-0 z-40 flex w-full flex-col border-l border-line bg-surface shadow-2xl shadow-black/40 transition-[transform,visibility] duration-300 ease-out ${
         open ? 'visible translate-x-0' : 'invisible translate-x-full'
       }`}
     >
