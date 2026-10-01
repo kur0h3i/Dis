@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import type { Alerts, ContainerSummary, Resources, Selection, Tool } from '../api/types';
 import { AlertsPanel } from '../components/AlertsPanel';
 import { ContainerCard } from '../components/ContainerCard';
 import { MiniChart } from '../components/MiniChart';
 import { ResourceBar } from '../components/ResourceBar';
 import { ToolCard } from '../components/ToolCard';
+import { isActive, readSortMode, saveSortMode, sortContainers } from '../lib/sortContainers';
 
 // Muestras de 10 s en 5 minutos: la sparkline crece de derecha a izquierda.
 const HISTORY_SLOTS = 30;
@@ -31,13 +33,24 @@ function timeLabel(ts: number): string {
   });
 }
 
-function SectionTitle({ title, meta }: { title: string; meta?: string }) {
+function SectionTitle({
+  title,
+  meta,
+  action,
+}: {
+  title: string;
+  meta?: string;
+  action?: React.ReactNode;
+}) {
   return (
     <div className="mb-3 flex items-baseline justify-between gap-4">
       <h2 className="font-mono text-xs font-semibold tracking-[0.2em] text-faint uppercase">
         {title}
       </h2>
-      {meta && <span className="font-mono text-xs text-faint">{meta}</span>}
+      <div className="flex items-baseline gap-3">
+        {meta && <span className="font-mono text-xs text-faint">{meta}</span>}
+        {action}
+      </div>
     </div>
   );
 }
@@ -52,6 +65,44 @@ function ErrorBox({ message }: { message: string }) {
 
 function Skeleton({ className = '' }: { className?: string }) {
   return <div className={`animate-pulse rounded-lg border border-line bg-surface ${className}`} />;
+}
+
+function ContainerGroup({
+  label,
+  items,
+  selectedContainer,
+  onSelect,
+  emptyText,
+}: {
+  label: string;
+  items: ContainerSummary[];
+  selectedContainer: string | null;
+  onSelect: (s: Selection) => void;
+  emptyText: string;
+}) {
+  return (
+    <div>
+      <div className="mb-2 flex items-center gap-2">
+        <span className="font-mono text-[11px] text-faint">{label}</span>
+        <span className="font-mono text-[11px] text-faint">· {items.length}</span>
+        <span className="h-px flex-1 bg-line" />
+      </div>
+      {items.length === 0 ? (
+        <p className="font-mono text-xs text-faint">{emptyText}</p>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {items.map((c) => (
+            <ContainerCard
+              key={c.id}
+              container={c}
+              selected={selectedContainer === c.name}
+              onSelect={(name) => onSelect({ kind: 'container', name })}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 function ResourcesSection({ q }: { q: Query<Resources> }) {
@@ -140,9 +191,20 @@ export function DashboardView({
   selection,
   onSelect,
 }: Props) {
-  const list = containers.data ?? [];
-  const runningCount = list.filter((c) => c.status === 'running').length;
+  const [sortMode, setSortMode] = useState(readSortMode);
+  const rawList = containers.data ?? [];
+  const list = sortContainers(rawList, sortMode);
+  const runningCount = rawList.filter((c) => c.status === 'running').length;
+  const activeCount = rawList.filter(isActive).length;
   const selectedContainer = selection?.kind === 'container' ? selection.name : null;
+
+  const toggleSort = () => {
+    setSortMode((prev) => {
+      const next = prev === 'active-first' ? 'default' : 'active-first';
+      saveSortMode(next);
+      return next;
+    });
+  };
 
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-10 px-4 py-6 sm:px-6">
@@ -154,7 +216,30 @@ export function DashboardView({
       <section>
         <SectionTitle
           title="Servicios Docker"
-          meta={containers.data ? `${runningCount}/${list.length} en marcha` : undefined}
+          meta={containers.data ? `${runningCount}/${rawList.length} en marcha` : undefined}
+          action={
+            rawList.length > 1 ? (
+              <button
+                type="button"
+                onClick={toggleSort}
+                aria-pressed={sortMode === 'active-first'}
+                title={
+                  sortMode === 'active-first'
+                    ? 'Orden por defecto'
+                    : 'Primero los que se pueden abrir (con UI web)'
+                }
+                className={`rounded-md border px-2 py-1 font-mono text-[11px] transition-colors ${
+                  sortMode === 'active-first'
+                    ? 'border-accent/60 bg-accent/10 text-accent-ink'
+                    : 'border-line text-muted hover:border-accent/40 hover:text-ink'
+                }`}
+              >
+                {sortMode === 'active-first'
+                  ? `abribles primero · ${activeCount}`
+                  : 'ordenar: abribles primero'}
+              </button>
+            ) : undefined
+          }
         />
         {containers.error && <ErrorBox message={containers.error.message} />}
         {!containers.data && !containers.error && (
@@ -167,18 +252,36 @@ export function DashboardView({
         {containers.data && list.length === 0 && (
           <p className="text-sm text-muted">No hay contenedores.</p>
         )}
-        {list.length > 0 && (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {list.map((c) => (
-              <ContainerCard
-                key={c.id}
-                container={c}
-                selected={selectedContainer === c.name}
-                onSelect={(name) => onSelect({ kind: 'container', name })}
+        {list.length > 0 &&
+          (sortMode === 'active-first' ? (
+            <div className="space-y-6">
+              <ContainerGroup
+                label="Abribles · con UI web"
+                items={list.filter(isActive)}
+                selectedContainer={selectedContainer}
+                onSelect={onSelect}
+                emptyText="Ninguno en marcha con UI web."
               />
-            ))}
-          </div>
-        )}
+              <ContainerGroup
+                label="Pasivos · sin UI web"
+                items={list.filter((c) => !isActive(c))}
+                selectedContainer={selectedContainer}
+                onSelect={onSelect}
+                emptyText="Ninguno."
+              />
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {list.map((c) => (
+                <ContainerCard
+                  key={c.id}
+                  container={c}
+                  selected={selectedContainer === c.name}
+                  onSelect={(name) => onSelect({ kind: 'container', name })}
+                />
+              ))}
+            </div>
+          ))}
       </section>
 
       <section>
