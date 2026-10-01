@@ -5,6 +5,13 @@ import { useState } from 'react';
 const failed = new Set<string>();
 const loaded = new Set<string>();
 
+// Logos del catálogo dashboard-icons (ver backend/app/icons.py): transparentes y
+// muchos oscuros (Adminer, Valkey, GitHub...), así que van sobre una baldosa
+// clara, como el icono de una app; en el tema oscuro no se verían. Los favicons
+// (Dis, Caronte, Cerbero...) ya están pensados para verse solos en la pestaña
+// del navegador: se pintan tal cual, sin el marco blanco alrededor.
+const CATALOG = '/homarr-labs/dashboard-icons/';
+
 /** Tono estable por nombre, para que cada monograma tenga su color. */
 function hue(name: string): number {
   let h = 0;
@@ -25,23 +32,21 @@ interface Props {
  * Logo del servicio: la primera URL candidata que carga. Mientras tanto, o si
  * ninguna carga, un monograma con la inicial. Es decorativo: el nombre siempre
  * va al lado.
- *
- * El logo va sobre una baldosa clara, como el icono de una app: muchos son
- * oscuros (Adminer, Valkey, GitHub...) y en el tema oscuro no se verían.
  */
 export function ServiceIcon({ icons, name, size = 20, className = '' }: Props) {
   const [, setFailures] = useState(0);
   const [ready, setReady] = useState<string | null>(null);
   const src = icons.find((u) => !failed.has(u));
   const shown = src != null && (ready === src || loaded.has(src));
+  const tile = shown && src.includes(CATALOG);
 
   return (
     <span
       aria-hidden
       className={`relative inline-flex shrink-0 items-center justify-center rounded-md ${
-        shown ? 'bg-zinc-100' : ''
+        tile ? 'bg-zinc-100' : ''
       } ${className}`}
-      style={{ width: size, height: size, padding: shown ? Math.round(size * 0.1) : 0 }}
+      style={{ width: size, height: size, padding: tile ? Math.round(size * 0.1) : 0 }}
     >
       {!shown && (
         <span
