@@ -214,6 +214,23 @@ export function DashboardView({
       </section>
 
       <section>
+        <SectionTitle title="Herramientas" meta="ecosistema server-kuro" />
+        {tools.error && <ErrorBox message={tools.error.message} />}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {!tools.data && !tools.error && (
+            <>
+              <Skeleton className="h-28" />
+              <Skeleton className="h-28" />
+              <Skeleton className="h-28" />
+            </>
+          )}
+          {tools.data?.map((t) => (
+            <ToolCard key={t.id} tool={t} onSelect={(id) => onSelect({ kind: 'tool', id })} />
+          ))}
+        </div>
+      </section>
+
+      <section>
         <SectionTitle
           title="Servicios Docker"
           meta={containers.data ? `${runningCount}/${rawList.length} en marcha` : undefined}
@@ -285,23 +302,7 @@ export function DashboardView({
       </section>
 
       <section>
-        <SectionTitle title="Herramientas" meta="ecosistema server-kuro" />
-        {tools.error && <ErrorBox message={tools.error.message} />}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {!tools.data && !tools.error && (
-            <>
-              <Skeleton className="h-28" />
-              <Skeleton className="h-28" />
-              <Skeleton className="h-28" />
-            </>
-          )}
-          {tools.data?.map((t) => (
-            <ToolCard key={t.id} tool={t} onSelect={(id) => onSelect({ kind: 'tool', id })} />
-          ))}
-        </div>
-        <div className="mt-4">
-          <AlertsPanel alerts={alerts.data} loading={alerts.isLoading} />
-        </div>
+        <AlertsPanel alerts={alerts.data} loading={alerts.isLoading} />
       </section>
     </div>
   );
