@@ -163,35 +163,37 @@ function ResourcesSection({ q }: { q: Query<Resources> }) {
   if (q.error && !q.data) return <ErrorBox message={`Recursos: ${q.error.message}`} />;
   if (!q.data) {
     return (
-      <div className="grid gap-4 @2xl:grid-cols-3">
+      <div className="grid grid-cols-2 gap-4 @2xl:grid-cols-3">
         <Skeleton className="h-40" />
         <Skeleton className="h-40" />
-        <Skeleton className="h-40" />
+        <Skeleton className="col-span-2 h-40 @2xl:col-span-1" />
       </div>
     );
   }
   const r = q.data;
   const labels = r.history_5m.map((s) => timeLabel(s.ts));
   return (
-    <div className="grid gap-4 @2xl:grid-cols-3">
+    <div className="grid grid-cols-2 gap-4 @2xl:grid-cols-3">
       <div className="flex flex-col gap-3 rounded-lg border border-line bg-surface p-4">
         <div className="flex items-baseline justify-between">
           <span className="font-mono text-xs text-muted">CPU</span>
           <span className="font-mono text-[11px] text-faint">{r.cpu_count} hilos</span>
         </div>
-        <div className="font-mono text-3xl font-semibold text-ink">
+        <div className="font-mono text-2xl font-semibold md:text-3xl text-ink">
           {r.cpu_pct.toFixed(0)}
-          <span className="text-lg text-faint">%</span>
+          <span className="text-sm text-faint md:text-lg">%</span>
         </div>
-        <MiniChart
-          values={r.history_5m.map((s) => s.cpu_pct)}
-          labels={labels}
-          min={0}
-          max={100}
-          capacity={HISTORY_SLOTS}
-          format={(v) => `${v.toFixed(1)}%`}
-          ariaLabel="Uso de CPU en los últimos 5 minutos"
-        />
+        <div className="max-md:hidden">
+          <MiniChart
+            values={r.history_5m.map((s) => s.cpu_pct)}
+            labels={labels}
+            min={0}
+            max={100}
+            capacity={HISTORY_SLOTS}
+            format={(v) => `${v.toFixed(1)}%`}
+            ariaLabel="Uso de CPU en los últimos 5 minutos"
+          />
+        </div>
       </div>
 
       <div className="flex flex-col gap-3 rounded-lg border border-line bg-surface p-4">
@@ -201,24 +203,26 @@ function ResourcesSection({ q }: { q: Query<Resources> }) {
             libre {(r.ram_total_gb - r.ram_used_gb).toFixed(1)} GB
           </span>
         </div>
-        <div className="font-mono text-3xl font-semibold text-ink">
+        <div className="font-mono text-2xl font-semibold md:text-3xl text-ink">
           {r.ram_used_gb.toFixed(1)}
-          <span className="text-lg text-faint"> / {r.ram_total_gb.toFixed(0)} GB</span>
+          <span className="text-sm text-faint md:text-lg"> / {r.ram_total_gb.toFixed(0)} GB</span>
         </div>
         <ResourceBar label="en uso" pct={r.ram_pct} />
-        <MiniChart
-          values={r.history_5m.map((s) => s.ram_used_gb)}
-          labels={labels}
-          min={0}
-          max={r.ram_total_gb}
-          capacity={HISTORY_SLOTS}
-          height={32}
-          format={(v) => `${v.toFixed(2)} GB`}
-          ariaLabel="RAM usada en los últimos 5 minutos"
-        />
+        <div className="max-md:hidden">
+          <MiniChart
+            values={r.history_5m.map((s) => s.ram_used_gb)}
+            labels={labels}
+            min={0}
+            max={r.ram_total_gb}
+            capacity={HISTORY_SLOTS}
+            height={32}
+            format={(v) => `${v.toFixed(2)} GB`}
+            ariaLabel="RAM usada en los últimos 5 minutos"
+          />
+        </div>
       </div>
 
-      <div className="flex flex-col gap-3 rounded-lg border border-line bg-surface p-4">
+      <div className="col-span-2 flex flex-col gap-3 rounded-lg border border-line bg-surface p-4 @2xl:col-span-1">
         <span className="font-mono text-xs text-muted">Discos</span>
         {r.disks.length === 0 && <p className="text-sm text-faint">Sin discos configurados.</p>}
         <div className="space-y-3">
