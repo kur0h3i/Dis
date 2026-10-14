@@ -75,6 +75,13 @@ export function isProblem(status: ToolStatus): boolean {
   return status === 'unhealthy' || status === 'restarting' || status === 'paused';
 }
 
+/** Nivel de una línea de log por palabras clave; null si no destaca. */
+export function logLevel(line: string): 'error' | 'warn' | null {
+  if (/\b(error|fatal|panic|exception|crit(ical)?)\b/i.test(line)) return 'error';
+  if (/\bwarn(ing)?\b/i.test(line)) return 'warn';
+  return null;
+}
+
 /** Antigüedad legible de un dato: "hace menos de 1 min", "hace 5 min", "hace 2 h". */
 export function formatAge(ms: number): string {
   if (ms < 60_000) return 'hace menos de 1 min';
