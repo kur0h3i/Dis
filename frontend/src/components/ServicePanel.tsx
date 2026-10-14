@@ -142,6 +142,32 @@ function Logs({ name }: { name: string }) {
   );
 }
 
+function DepButton({
+  dep,
+  tools,
+  onSelect,
+}: {
+  dep: string;
+  tools: Tool[] | undefined;
+  onSelect: (s: Selection) => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={() =>
+        onSelect(
+          tools?.some((t) => t.id === dep)
+            ? { kind: 'tool', id: dep }
+            : { kind: 'container', name: dep },
+        )
+      }
+      className="rounded bg-surface-2 px-1.5 text-accent-ink hover:underline"
+    >
+      {dep}
+    </button>
+  );
+}
+
 function ContainerSections({
   detail,
   tools,
@@ -159,20 +185,7 @@ function ContainerSections({
         <Section title="Depende de">
           <div className="flex flex-wrap items-center gap-1 font-mono text-xs">
             {detail.depends_on.map((dep) => (
-              <button
-                key={dep}
-                type="button"
-                onClick={() =>
-                  onSelect(
-                    tools?.some((t) => t.id === dep)
-                      ? { kind: 'tool', id: dep }
-                      : { kind: 'container', name: dep },
-                  )
-                }
-                className="rounded bg-surface-2 px-1.5 text-accent-ink hover:underline"
-              >
-                {dep}
-              </button>
+              <DepButton key={dep} dep={dep} tools={tools} onSelect={onSelect} />
             ))}
             {detail.detected.includes('depends_on') && (
               <span className="text-[11px] text-faint">· incluye el depends_on de Compose</span>
@@ -320,20 +333,7 @@ function PanelBody({ selection, tools, containers, onSelect }: Omit<Props, 'onCl
             <dd className="flex flex-wrap gap-1">
               {tool.depends_on.length === 0 && <span className="text-ink">—</span>}
               {tool.depends_on.map((dep) => (
-                <button
-                  key={dep}
-                  type="button"
-                  onClick={() =>
-                    onSelect(
-                      tools?.some((t) => t.id === dep)
-                        ? { kind: 'tool', id: dep }
-                        : { kind: 'container', name: dep },
-                    )
-                  }
-                  className="rounded bg-surface-2 px-1.5 text-accent-ink hover:underline"
-                >
-                  {dep}
-                </button>
+                <DepButton key={dep} dep={dep} tools={tools} onSelect={onSelect} />
               ))}
             </dd>
           </dl>
