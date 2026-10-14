@@ -70,6 +70,8 @@ function LiveMetrics({ name, running }: { name: string; running: boolean }) {
   if (error) return <p className="font-mono text-xs text-danger">{error.message}</p>;
   const latest = data?.latest;
   const samples = data?.samples ?? [];
+  // La red necesita dos muestras (≤ 10 s); antes habría cajas con "—".
+  if (samples.length < 2) return <p className="font-mono text-xs text-muted">Midiendo…</p>;
   const labels = samples.map((s) => new Date(s.ts).toLocaleTimeString());
   const slots = 13;
   return (
@@ -233,7 +235,10 @@ function ContainerSections({
         {detail.url && running && <ExternalLink href={detail.url} label="Abrir UI" />}
       </Section>
 
-      <Section title={`Variables de entorno (${detail.env.length})`}>
+      <details className="space-y-2">
+        <summary className="cursor-pointer pointer-coarse:min-h-10 font-mono text-[11px] font-semibold tracking-[0.2em] text-faint uppercase">
+          Variables de entorno ({detail.env.length})
+        </summary>
         {detail.env.length === 0 ? (
           <p className="text-sm text-muted">Sin variables.</p>
         ) : (
@@ -255,7 +260,7 @@ function ContainerSections({
             </table>
           </div>
         )}
-      </Section>
+      </details>
 
       <Section title="Logs · últimas 100 líneas">
         <Logs name={detail.name} />
