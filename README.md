@@ -286,7 +286,7 @@ Antes de subir cambios:
 
 ```bash
 cd backend && .venv/bin/ruff check . && .venv/bin/ruff format --check . && .venv/bin/pytest
-cd frontend && npm run lint && npm run format:check && npm run build
+cd frontend && npm run lint && npm run format:check && npm run build && npm test
 ```
 
 ### Estructura
