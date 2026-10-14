@@ -1,7 +1,7 @@
 import { Handle, type Node, type NodeProps, Position } from '@xyflow/react';
 import { memo } from 'react';
 import type { ContainerSummary, GraphNode, Selection } from '../api/types';
-import { formatMb, formatPct, formatUptime, STATUS_LABEL } from '../lib/format';
+import { formatMb, formatPct, formatUptime, severityEdge, STATUS_LABEL } from '../lib/format';
 import { NODE_WIDTH } from '../lib/graphLayout';
 import { selectionFor } from '../lib/selection';
 import { ExternalLink } from './ExternalLink';
@@ -35,7 +35,7 @@ function ServiceNodeImpl({ data, selected }: NodeProps<ServiceFlowNode>) {
           : selected
             ? 'border-accent-2'
             : 'border-line'
-      } ${inactive ? 'border-dashed' : ''} ${dimmed ? 'opacity-25' : inactive && !active ? 'opacity-55' : ''}`}
+      } ${severityEdge(node.status)} ${inactive ? 'border-dashed' : ''} ${dimmed ? 'opacity-25' : inactive && !active ? 'opacity-55' : ''}`}
     >
       <Handle type="target" position={Position.Top} isConnectable={false} className="opacity-0!" />
 
