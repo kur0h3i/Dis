@@ -39,7 +39,7 @@ export function AlertsPanel({ alerts, loading = false }: Props) {
         <ul className="space-y-1.5">
           {alerts.alerts.map((a, i) => (
             <li key={i} className="flex gap-2 font-mono text-xs">
-              <span className="text-[#eab308]">▲</span>
+              <span className="text-warn">▲</span>
               <span className="text-ink">{alertText(a)}</span>
             </li>
           ))}

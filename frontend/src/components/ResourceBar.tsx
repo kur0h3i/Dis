@@ -11,7 +11,8 @@ interface Props {
 /** Barra horizontal de uso (RAM, disco...). */
 export function ResourceBar({ label, pct, detail, warnAt = 75, critAt = 90 }: Props) {
   const clamped = Math.min(Math.max(pct, 0), 100);
-  const color = clamped >= critAt ? '#ef4444' : clamped >= warnAt ? '#eab308' : 'var(--accent)';
+  const color =
+    clamped >= critAt ? 'var(--danger)' : clamped >= warnAt ? 'var(--warn)' : 'var(--accent)';
   return (
     <div className="space-y-1">
       <div className="flex items-baseline justify-between gap-2 font-mono text-xs">

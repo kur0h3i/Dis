@@ -57,7 +57,7 @@ function SectionTitle({
 
 function ErrorBox({ message }: { message: string }) {
   return (
-    <div className="rounded-lg border border-[#ef4444]/40 bg-[#ef4444]/5 p-4 font-mono text-xs text-[#ef4444]">
+    <div className="rounded-lg border border-danger/40 bg-danger/5 p-4 font-mono text-xs text-danger">
       {message}
     </div>
   );

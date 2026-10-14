@@ -47,7 +47,7 @@ export function LogViewer({ lines, loading, error, onRefresh, onClear, updatedAt
         ref={scrollRef}
         className="h-72 overflow-auto bg-bg px-3 py-2 font-mono text-[11px] leading-relaxed text-muted"
       >
-        {error && <div className="text-[#ef4444]">{error}</div>}
+        {error && <div className="text-danger">{error}</div>}
         {!error && lines && lines.length === 0 && <div className="text-faint">(sin líneas)</div>}
         {lines?.map((line, i) => (
           <div key={i} className="break-all whitespace-pre-wrap hover:bg-surface-2">

@@ -67,7 +67,7 @@ function LiveMetrics({ name, running }: { name: string; running: boolean }) {
   if (!running) {
     return <p className="text-sm text-muted">El contenedor no está en marcha.</p>;
   }
-  if (error) return <p className="font-mono text-xs text-[#ef4444]">{error.message}</p>;
+  if (error) return <p className="font-mono text-xs text-danger">{error.message}</p>;
   const latest = data?.latest;
   const samples = data?.samples ?? [];
   const labels = samples.map((s) => new Date(s.ts).toLocaleTimeString());
@@ -346,7 +346,7 @@ function PanelBody({ selection, tools, containers, onSelect }: Omit<Props, 'onCl
           El contenedor <span className="text-ink">{containerName}</span> no existe en Docker.
         </p>
       )}
-      {detail.error && <p className="font-mono text-xs text-[#ef4444]">{detail.error.message}</p>}
+      {detail.error && <p className="font-mono text-xs text-danger">{detail.error.message}</p>}
       {known && !d && !detail.error && (
         <div className="h-40 animate-pulse rounded-lg border border-line bg-surface-2" />
       )}

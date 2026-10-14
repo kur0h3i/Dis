@@ -446,10 +446,7 @@ export function AddServiceDialog({ tools, containers, onClose }: Props) {
             {notes.length > 0 && (
               <ul className="space-y-1 font-mono text-[11px]">
                 {notes.map((n) => (
-                  <li
-                    key={n.text}
-                    className={n.level === 'error' ? 'text-[#ef4444]' : 'text-muted'}
-                  >
+                  <li key={n.text} className={n.level === 'error' ? 'text-danger' : 'text-muted'}>
                     {n.level === 'error' ? '✕ ' : '· '}
                     {n.text}
                   </li>
@@ -461,7 +458,7 @@ export function AddServiceDialog({ tools, containers, onClose }: Props) {
 
         <footer className="border-t border-line px-5 py-3 font-mono text-[11px] text-faint">
           {cfg?.error ? (
-            <div className="space-y-1 text-[#ef4444]">
+            <div className="space-y-1 text-danger">
               <p>dis.yaml no se pudo recargar; Dis sigue con la versión anterior:</p>
               <pre className="max-h-24 overflow-auto whitespace-pre-wrap">{cfg.error}</pre>
             </div>

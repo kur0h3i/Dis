@@ -54,7 +54,7 @@ export default function App() {
           >
             <span
               className="h-1.5 w-1.5 rounded-full"
-              style={{ backgroundColor: resources.error ? '#ef4444' : '#22c55e' }}
+              style={{ backgroundColor: resources.error ? 'var(--danger)' : 'var(--ok)' }}
             />
             {resources.error ? 'sin conexión con la API' : 'en vivo'}
           </span>
@@ -80,7 +80,7 @@ export default function App() {
               type="button"
               onClick={() => setAdding(true)}
               title={`dis.yaml no se pudo recargar: ${config.data.error}`}
-              className="font-mono text-[11px] text-[#ef4444] hover:underline"
+              className="font-mono text-[11px] text-danger hover:underline"
             >
               ⚠ dis.yaml
             </button>

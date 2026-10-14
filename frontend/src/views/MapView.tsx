@@ -46,6 +46,7 @@ import {
 import { nodeMatchesSelection, selectionFor } from '../lib/selection';
 import type { Theme } from '../lib/theme';
 
+// hex y no var(): el MiniMap/SVG los pinta fuera del CSS.
 const EDGE_OK = '#7c3aed';
 const EDGE_DOWN = '#f97316';
 // Margen superior extra para que la barra de búsqueda y leyenda no tape nodos.
@@ -280,7 +281,7 @@ function MapCanvas({ theme, selection, onSelect }: Props) {
 
   if (graph.error && !graph.data) {
     return (
-      <div className="p-6 font-mono text-sm text-[#ef4444]">
+      <div className="p-6 font-mono text-sm text-danger">
         Grafo no disponible: {graph.error.message}
       </div>
     );
@@ -353,7 +354,7 @@ function MapCanvas({ theme, selection, onSelect }: Props) {
               </button>
             </div>
             {graph.data && !graph.data.docker_available && (
-              <p className="text-[#ef4444]">Docker no disponible</p>
+              <p className="text-danger">Docker no disponible</p>
             )}
           </div>
         </Panel>
