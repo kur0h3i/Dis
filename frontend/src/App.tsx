@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   useAlerts,
   useConfigStatus,
@@ -37,8 +37,13 @@ export default function App() {
     else history.replaceState(history.state, '', url);
     setRoute(next);
   }, []);
+  // history.back() es asíncrono: sin esto, dos Escape seguidos retroceden dos veces y salen de Dis.
+  const closing = useRef(false);
   useEffect(() => {
-    const onPop = () => setRoute(parseHash(location.hash));
+    const onPop = () => {
+      closing.current = false;
+      setRoute(parseHash(location.hash));
+    };
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
   }, []);
@@ -59,8 +64,11 @@ export default function App() {
     [go],
   );
   const closePanel = useCallback(() => {
-    if (history.state?.panel) history.back();
-    else go({ view: parseHash(location.hash).view, selection: null }, false);
+    if (history.state?.panel) {
+      if (closing.current) return;
+      closing.current = true;
+      history.back();
+    } else go({ view: parseHash(location.hash).view, selection: null }, false);
   }, [go]);
 
   return (
