@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import type { ContainerSummary } from '../api/types';
 import { clickableProps } from '../lib/a11y';
 import {
@@ -19,13 +20,19 @@ interface Props {
 }
 
 export function ContainerCard({ container: c, onSelect, selected = false }: Props) {
+  const ref = useRef<HTMLDivElement>(null);
+  // Al pasar de 3 a 2 columnas (panel abierto) la tarjeta puede salirse de la pantalla.
+  useEffect(() => {
+    if (selected) ref.current?.scrollIntoView({ block: 'nearest' });
+  }, [selected]);
   const running = c.status === 'running' || c.status === 'unhealthy';
   const published = c.ports.filter((p) => p.host_port);
   return (
     <div
+      ref={ref}
       data-dis-selectable
       {...clickableProps(() => onSelect(c.name))}
-      className={`group flex w-full cursor-pointer flex-col gap-3 rounded-lg border bg-surface p-4 text-left transition-colors hover:border-accent/60 ${
+      className={`group flex w-full scroll-mt-16 cursor-pointer flex-col gap-3 rounded-lg border bg-surface p-4 text-left transition-colors hover:border-accent/60 ${
         selected ? 'border-accent' : 'border-line'
       } ${severityEdge(c.status)}`}
     >
