@@ -309,6 +309,7 @@ export function DashboardView({
     sortMode,
   );
   const activeCount = rawList.filter(isActive).length;
+  const hasAlerts = !!alerts.data?.connected && alerts.data.alerts.length > 0;
   const selectedContainer = selection?.kind === 'container' ? selection.name : null;
 
   const toggleSort = () => {
@@ -329,6 +330,7 @@ export function DashboardView({
           onSelect={onSelect}
         />
       )}
+      {hasAlerts && <AlertsPanel alerts={alerts.data} loading={alerts.isLoading} />}
       <div className="font-mono text-xs text-muted sm:max-w-sm">
         <MapSearch
           nodes={graph.data?.nodes ?? []}
@@ -463,9 +465,7 @@ export function DashboardView({
           ))}
       </section>
 
-      <section>
-        <AlertsPanel alerts={alerts.data} loading={alerts.isLoading} />
-      </section>
+      {!hasAlerts && <AlertsPanel alerts={alerts.data} loading={alerts.isLoading} />}
     </div>
   );
 }
