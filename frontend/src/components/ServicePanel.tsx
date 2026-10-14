@@ -6,7 +6,14 @@ import {
   useContainerStats,
 } from '../api/hooks';
 import type { ContainerDetail, ContainerSummary, Selection, Tool } from '../api/types';
-import { formatBytes, formatMb, formatPct, formatUptime, STATUS_LABEL } from '../lib/format';
+import {
+  formatBytes,
+  formatMb,
+  formatPct,
+  formatUptime,
+  isProblem,
+  STATUS_LABEL,
+} from '../lib/format';
 import { ExternalLink } from './ExternalLink';
 import { LogViewer } from './LogViewer';
 import { MiniChart } from './MiniChart';
@@ -181,8 +188,15 @@ function ContainerSections({
 }) {
   const running = detail.status === 'running' || detail.status === 'unhealthy';
   const urlDetected = detail.detected.includes('url');
+  const logs = (
+    <Section title="Logs · últimas 100 líneas">
+      <Logs name={detail.name} />
+    </Section>
+  );
+  const urgent = isProblem(detail.status);
   return (
     <>
+      {urgent && logs}
       {detail.depends_on.length > 0 && (
         <Section title="Depende de">
           <div className="flex flex-wrap items-center gap-1 font-mono text-xs">
@@ -262,9 +276,7 @@ function ContainerSections({
         )}
       </details>
 
-      <Section title="Logs · últimas 100 líneas">
-        <Logs name={detail.name} />
-      </Section>
+      {!urgent && logs}
 
       <Section title="Acciones">
         <div className="flex flex-wrap gap-2">
@@ -304,7 +316,7 @@ function PanelBody({ selection, tools, containers, onSelect }: Omit<Props, 'onCl
 
   return (
     <div className="space-y-6">
-      <header className="space-y-2 pr-8">
+      <header className="sticky top-0 z-[5] -mx-6 space-y-2 border-b border-line bg-surface px-6 pt-6 pr-20 pb-3">
         <div className="flex items-center gap-2">
           <ServiceIcon icons={icons} name={title} size={28} className="mr-1" />
           <StatusDot status={status} />
@@ -315,17 +327,22 @@ function PanelBody({ selection, tools, containers, onSelect }: Omit<Props, 'onCl
             </span>
           )}
         </div>
-        {d && <div className="truncate font-mono text-xs text-faint">{d.image}</div>}
         <div className="flex flex-wrap gap-x-4 gap-y-1 font-mono text-xs text-muted">
           <span>estado: {STATUS_LABEL[status]}</span>
           {d && <span>activo: {formatUptime(d.uptime_s)}</span>}
           {d?.health && <span>health: {d.health}</span>}
           {d && <span className="text-faint">id {d.id}</span>}
         </div>
-        {(tool?.description || d?.description) && (
-          <p className="text-sm text-muted">{tool?.description || d?.description}</p>
-        )}
       </header>
+
+      {(d || tool?.description) && (
+        <div className="space-y-2">
+          {d && <div className="truncate font-mono text-xs text-faint">{d.image}</div>}
+          {(tool?.description || d?.description) && (
+            <p className="text-sm text-muted">{tool?.description || d?.description}</p>
+          )}
+        </div>
+      )}
 
       {tool && (
         <Section title="Herramienta">
@@ -443,7 +460,7 @@ export function ServicePanel({ selection, tools, containers, onSelect, onClose }
       >
         esc ✕
       </button>
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 overflow-y-auto px-6 pb-6">
         {shown && (
           <PanelBody
             // Remonta al cambiar de servicio: resetea logs limpiados, histórico, etc.

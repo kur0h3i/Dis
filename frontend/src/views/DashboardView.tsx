@@ -5,7 +5,7 @@ import { ContainerCard } from '../components/ContainerCard';
 import { MiniChart } from '../components/MiniChart';
 import { ResourceBar } from '../components/ResourceBar';
 import { ToolCard } from '../components/ToolCard';
-import { formatAge, STATUS_LABEL } from '../lib/format';
+import { formatAge, isProblem, STATUS_LABEL } from '../lib/format';
 import { isActive, readSortMode, saveSortMode, sortContainers } from '../lib/sortContainers';
 
 // Muestras de 10 s en 5 minutos: la sparkline crece de derecha a izquierda.
@@ -78,9 +78,7 @@ function HealthBand({
   onSelect: (s: Selection) => void;
 }) {
   const running = containers.filter((c) => c.status === 'running').length;
-  const problems = containers.filter((c) =>
-    ['unhealthy', 'restarting', 'paused'].includes(c.status),
-  );
+  const problems = containers.filter((c) => isProblem(c.status));
   const stopped = containers.filter((c) => c.status === 'stopped').length;
   return (
     <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-line bg-surface px-4 py-3 font-mono text-xs">

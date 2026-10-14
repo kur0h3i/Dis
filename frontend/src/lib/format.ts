@@ -70,6 +70,11 @@ export function severityEdge(status: ToolStatus): string {
   return '';
 }
 
+/** Estados que piden atención. Un contenedor parado no cuenta: puede ser intencionado. */
+export function isProblem(status: ToolStatus): boolean {
+  return status === 'unhealthy' || status === 'restarting' || status === 'paused';
+}
+
 /** Antigüedad legible de un dato: "hace menos de 1 min", "hace 5 min", "hace 2 h". */
 export function formatAge(ms: number): string {
   if (ms < 60_000) return 'hace menos de 1 min';
