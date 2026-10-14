@@ -106,3 +106,13 @@ body {
 .react-flow__edge.dis-edge-faded {
   opacity: 0.15;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

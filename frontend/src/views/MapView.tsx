@@ -47,6 +47,8 @@ import { nodeMatchesSelection, selectionFor } from '../lib/selection';
 import type { Theme } from '../lib/theme';
 
 // hex y no var(): el MiniMap/SVG los pinta fuera del CSS.
+// Se lee una vez al cargar; si cambia la preferencia hay que recargar.
+const MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1;
 const EDGE_OK = '#7c3aed';
 const EDGE_DOWN = '#f97316';
 // Margen superior extra para que la barra de búsqueda y leyenda no tape nodos.
@@ -235,7 +237,7 @@ function MapCanvas({ theme, selection, onSelect }: Props) {
       if (fits && !always) return;
       void setCenter(node.position.x + w / 2 + panelW / (2 * zoom), node.position.y + h / 2, {
         zoom,
-        duration: 400,
+        duration: 400 * MOTION,
       });
     },
     [getNode, getViewport, setCenter, store],
@@ -276,7 +278,7 @@ function MapCanvas({ theme, selection, onSelect }: Props) {
     clearPositions();
     setLayoutVersion((v) => v + 1);
     // Se encola hasta que lleguen los nodos recolocados.
-    void fitView({ ...FIT_VIEW, duration: 400 });
+    void fitView({ ...FIT_VIEW, duration: 400 * MOTION });
   };
 
   if (graph.error && !graph.data) {
@@ -315,7 +317,10 @@ function MapCanvas({ theme, selection, onSelect }: Props) {
         style={{ background: 'var(--bg)' }}
       >
         <Background variant={BackgroundVariant.Dots} gap={20} size={1.2} color="var(--border)" />
-        <Controls showInteractive={false} fitViewOptions={{ ...FIT_VIEW, duration: 300 }} />
+        <Controls
+          showInteractive={false}
+          fitViewOptions={{ ...FIT_VIEW, duration: 300 * MOTION }}
+        />
         <MiniMap
           pannable
           zoomable
