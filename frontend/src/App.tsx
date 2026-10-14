@@ -29,6 +29,7 @@ export default function App() {
   const alerts = useAlerts();
   const config = useConfigStatus();
   useRefreshOnConfigReload(config.data?.loaded_at);
+  const liveError = resources.error ?? containers.error;
   const closePanel = useCallback(() => setSelection(null), []);
 
   return (
@@ -48,18 +49,27 @@ export default function App() {
             <span className="hidden font-mono text-xs text-faint sm:inline">server-kuro</span>
           </div>
 
+          {/* En móvil solo aparece si hay error: no cabe un punto fijo en 360 px. */}
           <span
-            className="ml-auto hidden items-center gap-1.5 font-mono text-[11px] text-faint sm:inline-flex"
-            title={resources.error?.message}
+            className={`ml-auto inline-flex items-center gap-1.5 font-mono text-[11px] text-faint ${liveError ? '' : 'max-sm:hidden'}`}
+            title={liveError?.message}
           >
             <span
               className="h-1.5 w-1.5 rounded-full"
-              style={{ backgroundColor: resources.error ? 'var(--danger)' : 'var(--ok)' }}
+              style={{ backgroundColor: liveError ? 'var(--danger)' : 'var(--ok)' }}
             />
-            {resources.error ? 'sin conexión con la API' : 'en vivo'}
+            <span className="sr-only sm:not-sr-only">
+              {resources.error
+                ? 'sin conexión con la API'
+                : containers.error
+                  ? 'Docker sin actualizar'
+                  : 'en vivo'}
+            </span>
           </span>
 
-          <nav className="ml-auto sm:ml-0 flex rounded-lg border border-line bg-surface p-0.5 font-mono text-xs">
+          <nav
+            className={`${liveError ? '' : 'ml-auto sm:ml-0'} flex rounded-lg border border-line bg-surface p-0.5 font-mono text-xs`}
+          >
             {(['dashboard', 'map'] as const).map((v) => (
               <button
                 key={v}
