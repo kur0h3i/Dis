@@ -27,7 +27,7 @@ export function ContainerCard({ container: c, onSelect, selected = false }: Prop
       {...clickableProps(() => onSelect(c.name))}
       className={`group flex w-full cursor-pointer flex-col gap-3 rounded-lg border bg-surface p-4 text-left transition-colors hover:border-accent/60 ${
         selected ? 'border-accent' : 'border-line'
-      } ${running ? '' : 'opacity-80'} ${severityEdge(c.status)}`}
+      } ${severityEdge(c.status)}`}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex min-w-0 items-center gap-3">

@@ -15,10 +15,10 @@
   --accent-2: #a78bfa;
   --accent-ink: #6d28d9;
   --grid: #e4e4e7;
-  /* Estado: en oscuro coinciden con STATUS_COLOR (lib/format.ts); en claro son más oscuros por contraste. */
-  --ok: #22c55e;
+  /* Estado: en oscuro coinciden con STATUS_COLOR (lib/format.ts); en claro son más oscuros por contraste (texto sobre fondo claro). */
+  --ok: #15803d;
   --warn: #b45309;
-  --danger: #dc2626;
+  --danger: #b91c1c;
   color-scheme: light;
 }
 
@@ -31,6 +31,7 @@
   --muted: #a3a3a3;
   --faint: #8a8a8a;
   --accent-ink: #a78bfa;
+  --ok: #22c55e;
   --warn: #eab308;
   --danger: #ef4444;
   --grid: #262626;
