@@ -98,7 +98,9 @@ function HealthBand({
       )}
       {alerts && (
         <span className="text-muted sm:ml-auto">
-          {alerts.connected ? `Cerbero: ${alerts.alerts.length} alerta${alerts.alerts.length === 1 ? '' : 's'}` : 'Cerbero: sin conexión'}
+          {alerts.connected
+            ? `Cerbero: ${alerts.alerts.length} alerta${alerts.alerts.length === 1 ? '' : 's'}`
+            : 'Cerbero: sin conexión'}
         </span>
       )}
     </div>
