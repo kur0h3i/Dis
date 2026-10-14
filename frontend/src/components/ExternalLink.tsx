@@ -14,7 +14,7 @@ export function ExternalLink({ href, label = 'Abrir', className = '' }: Props) {
       target="_blank"
       rel="noreferrer noopener"
       onClick={(e: MouseEvent) => e.stopPropagation()}
-      className={`inline-flex items-center gap-1 rounded-md border border-accent/40 bg-accent/10 px-2 py-1 font-mono text-xs text-accent-ink transition-colors hover:border-accent-2 hover:bg-accent/20 ${className}`}
+      className={`inline-flex items-center gap-1 pointer-coarse:min-h-10 rounded-md border border-accent/40 bg-accent/10 px-2 py-1 font-mono text-xs text-accent-ink transition-colors hover:border-accent-2 hover:bg-accent/20 ${className}`}
     >
       {label}
       <svg

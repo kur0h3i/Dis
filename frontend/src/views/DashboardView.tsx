@@ -93,7 +93,7 @@ function HealthBand({
           key={c.name}
           type="button"
           onClick={() => onSelect({ kind: 'container', name: c.name })}
-          className={`hover:underline ${c.status === 'unhealthy' ? 'text-danger' : 'text-warn'}`}
+          className={`pointer-coarse:min-h-10 hover:underline ${c.status === 'unhealthy' ? 'text-danger' : 'text-warn'}`}
         >
           {c.name} · {STATUS_LABEL[c.status]}
         </button>
@@ -305,7 +305,7 @@ export function DashboardView({
                     ? 'Orden por defecto'
                     : 'Primero los que se pueden abrir (con UI web)'
                 }
-                className={`rounded-md border px-2 py-1 font-mono text-[11px] transition-colors ${
+                className={`inline-flex items-center pointer-coarse:min-h-10 rounded-md border px-2 py-1 font-mono text-[11px] transition-colors ${
                   sortMode === 'active-first'
                     ? 'border-accent/60 bg-accent/10 text-accent-ink'
                     : 'border-line text-muted hover:border-accent/40 hover:text-ink'

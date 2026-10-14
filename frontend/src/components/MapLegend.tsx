@@ -19,7 +19,7 @@ export function MapLegend({ counts, hidden, onToggle }: Props) {
             onClick={() => onToggle(group)}
             aria-pressed={!off}
             title={off ? `Mostrar ${label}` : `Ocultar ${label}`}
-            className={`inline-flex items-center gap-1.5 rounded-md border px-1.5 py-0.5 transition-colors ${
+            className={`inline-flex items-center gap-1.5 pointer-coarse:min-h-8 rounded-md border px-1.5 py-0.5 transition-colors ${
               off
                 ? 'border-transparent text-faint line-through opacity-60'
                 : 'border-line text-muted hover:border-accent/60 hover:text-ink'

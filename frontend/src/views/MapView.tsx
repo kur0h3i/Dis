@@ -353,7 +353,7 @@ function MapCanvas({ theme, selection, onSelect }: Props) {
                 type="button"
                 onClick={resetLayout}
                 title="Recolocar los nodos y encuadrar el mapa"
-                className="ml-auto rounded-md border border-line px-2 py-1 text-ink hover:border-accent/60"
+                className="ml-auto pointer-coarse:min-h-8 rounded-md border border-line px-2 py-1 text-ink hover:border-accent/60"
               >
                 Reordenar
               </button>

@@ -29,7 +29,7 @@ export function LogViewer({ lines, loading, error, onRefresh, onClear, updatedAt
           <button
             type="button"
             onClick={onClear}
-            className="rounded px-2 py-0.5 font-mono text-[11px] text-muted hover:bg-surface hover:text-ink"
+            className="rounded px-2 py-0.5 pointer-coarse:min-h-10 font-mono text-[11px] text-muted hover:bg-surface hover:text-ink"
           >
             limpiar
           </button>
@@ -37,7 +37,7 @@ export function LogViewer({ lines, loading, error, onRefresh, onClear, updatedAt
             type="button"
             onClick={onRefresh}
             disabled={loading}
-            className="rounded px-2 py-0.5 font-mono text-[11px] text-accent-ink hover:bg-surface disabled:opacity-50"
+            className="rounded px-2 py-0.5 pointer-coarse:min-h-10 font-mono text-[11px] text-accent-ink hover:bg-surface disabled:opacity-50"
           >
             {loading ? 'cargando…' : 'refrescar'}
           </button>

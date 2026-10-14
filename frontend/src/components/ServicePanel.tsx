@@ -434,7 +434,7 @@ export function ServicePanel({ selection, tools, containers, onSelect, onClose }
         type="button"
         onClick={onClose}
         aria-label="Cerrar panel"
-        className="absolute top-4 right-4 z-10 rounded-md px-2 py-1 font-mono text-sm text-faint hover:bg-surface-2 hover:text-ink"
+        className="absolute top-4 right-4 z-10 flex items-center pointer-coarse:min-h-10 rounded-md px-2 py-1 font-mono text-sm text-faint hover:bg-surface-2 hover:text-ink"
       >
         esc ✕
       </button>
