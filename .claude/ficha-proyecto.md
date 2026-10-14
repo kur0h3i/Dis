@@ -62,7 +62,7 @@ frontend/src/
                      ResourceBar, MiniChart, StatusDot, AlertsPanel, MapSearch, MapLegend,
                      AddServiceDialog, ExternalLink, LogViewer
   api/              tipos, cliente fetch y hooks de react-query
-  lib/              format, theme, a11y, selection, graphLayout, graphFocus, sortContainers, snippets
+  lib/              format, theme, a11y, selection, graphLayout, graphFocus, sortContainers, route, snippets
 dis.yaml            configuración (herramientas, URLs, dependencias, iconos) — se recarga sola
 Dockerfile · docker-compose.yml
 .claude/agents/     subagentes del flujo (arquitecto, disenador, programador, revisor, viabilidad)
@@ -81,13 +81,19 @@ Dockerfile · docker-compose.yml
 - El logo (`frontend/src/assets/dis-logo.svg`) es la ciudad amurallada en llamas sobre la Estigia.
 
 ## Qué hace hoy
-- **Dashboard**: recursos (CPU/RAM/discos con sparklines de 5 min), herramientas y contenedores en
-  tarjetas, alertas de Cerbero. Herramientas van encima de los contenedores. Botón "ordenar"
-  (abribles primero). Botón "+ Añadir" que genera la config de un servicio.
+- **Dashboard**: recursos (CPU/RAM/discos con sparklines de 5 min), herramientas y contenedores,
+  alertas de Cerbero (tarjeta solo si hay alertas). Buscador `/` y filtro por estado en el
+  dashboard. Contenedores agrupados por familia (prefijo del nombre, grupos plegables que se
+  recuerdan; los problemas suben) con tarjeta compacta para los no abribles; botón "ordenar"
+  (abribles primero). Errores con causa, último dato bueno y "Reintentar". Botón "+ Añadir".
 - **Mapa** (React Flow): un nodo por servicio, aristas de dependencia, foco al hover, buscador `/`,
-  filtros por estado, arrastre con posiciones en localStorage, botón "Reordenar".
-- **Panel lateral** de detalle: métricas en vivo (5 s), puertos, env (credenciales enmascaradas),
-  últimos 100 logs. No modal; se cierra con Escape o clic fuera.
+  filtros por estado (barra plegable en móvil), arrastre con posiciones en localStorage, botón
+  "Reordenar", filo de severidad y zoom semántico (nodo compacto con nombre grande por debajo de 0,75).
+- **Panel lateral** de detalle: cabecera fija con "ver en el mapa / dashboard", métricas en vivo
+  (5 s), puertos, env plegado (credenciales enmascaradas), últimos 100 logs con color por nivel y
+  filtro (primero si hay problema). No modal; se cierra con Escape o clic fuera.
+- **Enlaces por hash** (`#/c/<nombre>`, `#/t/<id>`, `#/mapa[/...]`): recargar conserva vista y
+  panel; Atrás cierra el panel.
 - **Autodetección** desde Docker (url/descripción/dependencias/iconos) y **recarga en caliente** de
   `dis.yaml`.
 
@@ -122,8 +128,11 @@ Las env vars con PASSWORD/SECRET/KEY/TOKEN se devuelven como `***`.
   rejillas usan container queries; franja de salud con contador de parados y antigüedad del dato;
   indicador de conexión también en móvil (solo con error); objetivos táctiles con `pointer-coarse`;
   recursos compactos en móvil. Sin verificar en navegador.
-- Pendiente: barra del mapa en táctil ~168 px estimados; `FIT_VIEW` reserva 175 px; medir en móvil
-  real y ajustar si tapa nodos.
+- UI/UX fase 3 hecha en la misma rama (familias, tarjeta compacta, panel con cabecera fija, mapa
+  legible en móvil, hash, búsqueda en el dashboard, errores con Reintentar, tipografía, alertas).
+  Sin verificar en navegador ni en móvil real: barra del mapa plegada (~70-77 px estimados frente a
+  los 80 px de `FIT_VIEW`), encuadre inicial a zoom 0,5, umbral 0,75 del zoom semántico, familias
+  con los nombres reales y Atrás en móvil.
 - Capturas `docs/*.png` sin regenerar (hace falta el servidor real).
 - TODOs de producto: acciones start/stop/restart (con auth antes), autenticación de Dis, Cerbero en
   vivo, health-check HTTP de herramientas sin contenedor.
