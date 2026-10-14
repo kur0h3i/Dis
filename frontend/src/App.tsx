@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   useAlerts,
   useConfigStatus,
@@ -11,16 +11,15 @@ import type { Selection } from './api/types';
 import logo from './assets/dis-logo.svg';
 import { AddServiceDialog } from './components/AddServiceDialog';
 import { ServicePanel } from './components/ServicePanel';
+import { formatHash, parseHash, type Route, type View } from './lib/route';
 import { useTheme } from './lib/theme';
 import { DashboardView } from './views/DashboardView';
 import { MapView } from './views/MapView';
 
-type View = 'dashboard' | 'map';
-
 export default function App() {
   const [theme, toggleTheme] = useTheme();
-  const [view, setView] = useState<View>('dashboard');
-  const [selection, setSelection] = useState<Selection | null>(null);
+  const [route, setRoute] = useState(() => parseHash(location.hash));
+  const { view, selection } = route;
   const [adding, setAdding] = useState(false);
 
   const resources = useResources();
@@ -30,7 +29,39 @@ export default function App() {
   const config = useConfigStatus();
   useRefreshOnConfigReload(config.data?.loaded_at);
   const liveError = resources.error ?? containers.error;
-  const closePanel = useCallback(() => setSelection(null), []);
+
+  // Estable (los nodos del mapa guardan onSelect): decide push/replace leyendo el hash en el momento.
+  const go = useCallback((next: Route, push: boolean, state?: object) => {
+    const url = formatHash(next);
+    if (push) history.pushState(state ?? null, '', url);
+    else history.replaceState(history.state, '', url);
+    setRoute(next);
+  }, []);
+  useEffect(() => {
+    const onPop = () => setRoute(parseHash(location.hash));
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+  const selectService = useCallback(
+    (s: Selection) => {
+      const cur = parseHash(location.hash);
+      // Abrir el panel es una entrada de historial (Atrás lo cierra); cambiar de servicio, no.
+      if (cur.selection) go({ ...cur, selection: s }, false);
+      else go({ view: cur.view, selection: s }, true, { panel: true });
+    },
+    [go],
+  );
+  const setView = useCallback(
+    (v: View) => {
+      const cur = parseHash(location.hash);
+      if (v !== cur.view) go({ view: v, selection: cur.selection }, true);
+    },
+    [go],
+  );
+  const closePanel = useCallback(() => {
+    if (history.state?.panel) history.back();
+    else go({ view: parseHash(location.hash).view, selection: null }, false);
+  }, [go]);
 
   return (
     <div className="flex min-h-full flex-col">
@@ -128,11 +159,11 @@ export default function App() {
             tools={tools}
             alerts={alerts}
             selection={selection}
-            onSelect={setSelection}
+            onSelect={selectService}
           />
         ) : (
           <div className="h-[calc(100dvh-3.5rem)]">
-            <MapView theme={theme} selection={selection} onSelect={setSelection} />
+            <MapView theme={theme} selection={selection} onSelect={selectService} />
           </div>
         )}
       </main>
@@ -141,7 +172,7 @@ export default function App() {
         selection={selection}
         tools={tools.data}
         containers={containers.data}
-        onSelect={setSelection}
+        onSelect={selectService}
         view={view}
         onToggleView={() => setView(view === 'map' ? 'dashboard' : 'map')}
         onClose={closePanel}
