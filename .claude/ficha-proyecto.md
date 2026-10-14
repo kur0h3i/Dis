@@ -118,6 +118,12 @@ Las env vars con PASSWORD/SECRET/KEY/TOKEN se devuelven como `***`.
 ## En curso / pendiente
 - Rediseño UI/UX cerrado en la rama `mejora/ui-ux` (pendiente de PR): tokens, fuentes, reduced-motion,
   contraste, severidad en tarjetas, franja de salud, foco del panel y cabecera móvil.
+- UI/UX fase 2 hecha en la misma rama: el panel reserva su sitio en el dashboard desde `lg` y las
+  rejillas usan container queries; franja de salud con contador de parados y antigüedad del dato;
+  indicador de conexión también en móvil (solo con error); objetivos táctiles con `pointer-coarse`;
+  recursos compactos en móvil. Sin verificar en navegador.
+- Pendiente: barra del mapa en táctil ~168 px estimados; `FIT_VIEW` reserva 175 px; medir en móvil
+  real y ajustar si tapa nodos.
 - Capturas `docs/*.png` sin regenerar (hace falta el servidor real).
 - TODOs de producto: acciones start/stop/restart (con auth antes), autenticación de Dis, Cerbero en
   vivo, health-check HTTP de herramientas sin contenedor.
