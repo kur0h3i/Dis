@@ -109,7 +109,8 @@ export default function App() {
         </div>
       </header>
 
-      <main className="flex-1">
+      {/* 520 = PANEL_MAX_WIDTH (ServicePanel.tsx); el mapa usa su propio reveal */}
+      <main className={`flex-1 ${view === 'dashboard' && selection ? 'lg:pr-[520px]' : ''}`}>
         {view === 'dashboard' ? (
           <DashboardView
             resources={resources}
