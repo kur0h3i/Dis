@@ -10,15 +10,15 @@
   --border: #e4e4e7;
   --text: #18181b;
   --muted: #52525b;
-  --faint: #71717a;
+  --faint: #6b6b73;
   --accent: #7c3aed;
   --accent-2: #a78bfa;
   --accent-ink: #6d28d9;
   --grid: #e4e4e7;
-  /* Estado: mismos valores que STATUS_COLOR (lib/format.ts). */
+  /* Estado: en oscuro coinciden con STATUS_COLOR (lib/format.ts); en claro son más oscuros por contraste. */
   --ok: #22c55e;
-  --warn: #eab308;
-  --danger: #ef4444;
+  --warn: #b45309;
+  --danger: #dc2626;
   color-scheme: light;
 }
 
@@ -29,8 +29,10 @@
   --border: #262626;
   --text: #e5e5e5;
   --muted: #a3a3a3;
-  --faint: #737373;
+  --faint: #8a8a8a;
   --accent-ink: #a78bfa;
+  --warn: #eab308;
+  --danger: #ef4444;
   --grid: #262626;
   color-scheme: dark;
 }

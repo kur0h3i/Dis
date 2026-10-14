@@ -1,6 +1,6 @@
 import type { ContainerStatus, PortMapping, ToolStatus } from '../api/types';
 
-// hex y no var(): el MiniMap/SVG los pinta fuera del CSS; mismos valores que --ok/--warn/--danger.
+// hex y no var(): el MiniMap/SVG los pinta fuera del CSS; coincide con --ok/--warn/--danger en oscuro.
 export const STATUS_COLOR: Record<ToolStatus, string> = {
   running: '#22c55e',
   stopped: '#6b7280',
