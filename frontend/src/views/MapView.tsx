@@ -48,12 +48,14 @@ import type { Theme } from '../lib/theme';
 
 // Se lee una vez al cargar; si cambia la preferencia hay que recargar.
 const MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1;
+// Se lee una vez al cargar, como MOTION.
+const NARROW = window.matchMedia('(max-width: 639.98px)').matches;
 // hex y no var(): el MiniMap/SVG los pinta fuera del CSS.
 const EDGE_OK = '#7c3aed';
 const EDGE_DOWN = '#f97316';
-// Margen superior extra para que la barra de búsqueda y leyenda no tape nodos.
+// Margen superior extra para que la barra de búsqueda y leyenda no tape nodos (plegada en móvil).
 const FIT_VIEW: FitViewOptions = {
-  padding: { top: '175px', right: 0.1, bottom: 0.1, left: 0.1 },
+  padding: { top: NARROW ? '80px' : '175px', right: 0.1, bottom: 0.1, left: 0.1 },
   maxZoom: 1,
 };
 
@@ -118,6 +120,7 @@ function MapCanvas({ theme, selection, onSelect }: Props) {
   const nodesReady = useNodesInitialized();
   const [hovered, setHovered] = useState<string | null>(null);
   const [query, setQuery] = useState('');
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [hidden, setHidden] = useState(loadHiddenGroups);
 
   // Sincroniza nodos con los datos al vuelo (patrón "ajustar estado en render",
@@ -335,28 +338,43 @@ function MapCanvas({ theme, selection, onSelect }: Props) {
             data-dis-selectable
             className="space-y-2 rounded-lg border border-line bg-surface/90 p-2.5 font-mono text-[11px] text-muted shadow backdrop-blur"
           >
-            <MapSearch
-              nodes={graph.data?.nodes ?? []}
-              query={query}
-              onQueryChange={setQuery}
-              onPick={pickFromSearch}
-            />
-            <MapLegend counts={counts} hidden={hidden} onToggle={toggleGroup} />
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-              <span className="inline-flex items-center gap-1.5">
-                <span className="h-0.5 w-4" style={{ backgroundColor: EDGE_OK }} /> depende de
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <span className="h-0.5 w-4" style={{ backgroundColor: EDGE_DOWN }} /> destino caído
-              </span>
+            <div className="flex gap-2">
+              <div className="min-w-0 flex-1">
+                <MapSearch
+                  nodes={graph.data?.nodes ?? []}
+                  query={query}
+                  onQueryChange={setQuery}
+                  onPick={pickFromSearch}
+                />
+              </div>
               <button
                 type="button"
-                onClick={resetLayout}
-                title="Recolocar los nodos y encuadrar el mapa"
-                className="ml-auto pointer-coarse:min-h-8 rounded-md border border-line px-2 py-1 text-ink hover:border-accent/60"
+                aria-expanded={filtersOpen}
+                onClick={() => setFiltersOpen((o) => !o)}
+                className="pointer-coarse:min-h-8 rounded-md border border-line px-2 py-1 text-ink hover:border-accent/60 sm:hidden"
               >
-                Reordenar
+                Filtros{hidden.size > 0 ? ` · ${hidden.size}` : ''}
               </button>
+            </div>
+            <div className={`space-y-2 ${filtersOpen ? '' : 'max-sm:hidden'}`}>
+              <MapLegend counts={counts} hidden={hidden} onToggle={toggleGroup} />
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="h-0.5 w-4" style={{ backgroundColor: EDGE_OK }} /> depende de
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="h-0.5 w-4" style={{ backgroundColor: EDGE_DOWN }} /> destino
+                  caído
+                </span>
+                <button
+                  type="button"
+                  onClick={resetLayout}
+                  title="Recolocar los nodos y encuadrar el mapa"
+                  className="ml-auto pointer-coarse:min-h-8 rounded-md border border-line px-2 py-1 text-ink hover:border-accent/60"
+                >
+                  Reordenar
+                </button>
+              </div>
             </div>
             {graph.data && !graph.data.docker_available && (
               <p className="text-danger">Docker no disponible</p>
