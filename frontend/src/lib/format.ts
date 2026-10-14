@@ -61,3 +61,11 @@ export function formatPort(p: PortMapping): string {
   const target = `${p.container_port}/${p.protocol}`;
   return p.host_port ? `${p.host_port}→${target}` : target;
 }
+
+/** Filo izquierdo de color para estados que piden atención (hover incluido: pisa el borde de hover). */
+export function severityEdge(status: ToolStatus): string {
+  if (status === 'unhealthy') return 'border-l-4 border-l-danger hover:border-l-danger';
+  if (status === 'restarting' || status === 'paused')
+    return 'border-l-4 border-l-warn hover:border-l-warn';
+  return '';
+}

@@ -1,6 +1,6 @@
 import type { Tool } from '../api/types';
 import { clickableProps } from '../lib/a11y';
-import { STATUS_LABEL } from '../lib/format';
+import { severityEdge, STATUS_LABEL } from '../lib/format';
 import { ExternalLink } from './ExternalLink';
 import { ServiceIcon } from './ServiceIcon';
 import { StatusDot } from './StatusDot';
@@ -50,7 +50,7 @@ export function ToolCard({ tool: t, onSelect }: Props) {
     <div
       data-dis-selectable
       {...clickableProps(() => onSelect(t.id))}
-      className={`${base} cursor-pointer transition-colors hover:border-accent/60`}
+      className={`${base} cursor-pointer transition-colors hover:border-accent/60 ${severityEdge(t.status)}`}
     >
       {body}
     </div>
