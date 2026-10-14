@@ -144,12 +144,13 @@ function ContainerGroup({
       {items.length === 0 ? (
         <p className="font-mono text-xs text-faint">{emptyText}</p>
       ) : (
-        <div className="grid grid-cols-1 gap-4 @xl:grid-cols-2 @4xl:grid-cols-3">
+        <div className="grid grid-cols-1 items-start gap-4 @xl:grid-cols-2 @4xl:grid-cols-3">
           {items.map((c) => (
             <ContainerCard
               key={c.id}
               container={c}
               selected={selectedContainer === c.name}
+              compact={!isActive(c)}
               onSelect={(name) => onSelect({ kind: 'container', name })}
             />
           ))}
@@ -352,12 +353,13 @@ export function DashboardView({
               />
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-4 @xl:grid-cols-2 @4xl:grid-cols-3">
+            <div className="grid grid-cols-1 items-start gap-4 @xl:grid-cols-2 @4xl:grid-cols-3">
               {list.map((c) => (
                 <ContainerCard
                   key={c.id}
                   container={c}
                   selected={selectedContainer === c.name}
+                  compact={!isActive(c)}
                   onSelect={(name) => onSelect({ kind: 'container', name })}
                 />
               ))}
