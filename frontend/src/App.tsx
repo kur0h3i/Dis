@@ -70,6 +70,7 @@ export default function App() {
         data-dis-selectable
         className="sticky top-0 z-30 h-14 border-b border-line bg-bg/85 backdrop-blur"
       >
+        <h1 className="sr-only">Dis, panel de server-kuro</h1>
         <div className="mx-auto flex h-full max-w-7xl items-center gap-2 px-4 sm:gap-4 sm:px-6">
           <div className="flex items-center gap-2">
             {/* La ciudad de Dis del Infierno de Dante: murallas al rojo sobre la Estigia. */}

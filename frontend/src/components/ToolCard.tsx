@@ -21,7 +21,7 @@ export function ToolCard({ tool: t, onSelect }: Props) {
           <span className="truncate font-mono text-sm font-semibold text-ink">{t.name}</span>
         </div>
         {t.is_self ? (
-          <span className="shrink-0 rounded-md border border-line px-2 py-1 font-mono text-[11px] text-faint">
+          <span className="shrink-0 rounded-md border border-line px-2 py-1 font-mono text-xs text-faint">
             estás aquí
           </span>
         ) : (
@@ -29,7 +29,7 @@ export function ToolCard({ tool: t, onSelect }: Props) {
         )}
       </div>
       <p className="line-clamp-2 text-sm text-muted">{t.description}</p>
-      <div className="mt-auto flex items-center justify-between font-mono text-[11px] text-faint">
+      <div className="mt-auto flex items-center justify-between font-mono text-xs text-faint">
         <span>{STATUS_LABEL[t.status]}</span>
         {t.depends_on.length > 0 && <span className="truncate">→ {t.depends_on.join(', ')}</span>}
       </div>

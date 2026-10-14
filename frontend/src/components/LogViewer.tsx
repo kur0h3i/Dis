@@ -25,7 +25,7 @@ export function LogViewer({ lines, loading, error, onRefresh, onClear, updatedAt
   return (
     <div className="overflow-hidden rounded-lg border border-line">
       <div className="flex items-center justify-between gap-2 border-b border-line bg-surface-2 px-3 py-1.5">
-        <span className="font-mono text-[11px] text-faint">
+        <span className="font-mono text-xs text-faint">
           {lines
             ? filter
               ? `${shown?.length} de ${lines.length} líneas`
@@ -39,13 +39,13 @@ export function LogViewer({ lines, loading, error, onRefresh, onClear, updatedAt
           placeholder="filtrar…"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="min-w-0 flex-1 rounded border border-line bg-bg px-2 py-0.5 pointer-coarse:min-h-10 font-mono text-[11px] text-ink placeholder:text-faint"
+          className="min-w-0 flex-1 rounded border border-line bg-bg px-2 py-0.5 pointer-coarse:min-h-10 font-mono text-xs text-ink placeholder:text-faint"
         />
         <div className="flex gap-1">
           <button
             type="button"
             onClick={onClear}
-            className="rounded px-2 py-0.5 pointer-coarse:min-h-10 font-mono text-[11px] text-muted hover:bg-surface hover:text-ink"
+            className="rounded px-2 py-0.5 pointer-coarse:min-h-10 font-mono text-xs text-muted hover:bg-surface hover:text-ink"
           >
             limpiar
           </button>
@@ -53,7 +53,7 @@ export function LogViewer({ lines, loading, error, onRefresh, onClear, updatedAt
             type="button"
             onClick={onRefresh}
             disabled={loading}
-            className="rounded px-2 py-0.5 pointer-coarse:min-h-10 font-mono text-[11px] text-accent-ink hover:bg-surface disabled:opacity-50"
+            className="rounded px-2 py-0.5 pointer-coarse:min-h-10 font-mono text-xs text-accent-ink hover:bg-surface disabled:opacity-50"
           >
             {loading ? 'cargando…' : 'refrescar'}
           </button>
@@ -61,7 +61,7 @@ export function LogViewer({ lines, loading, error, onRefresh, onClear, updatedAt
       </div>
       <div
         ref={scrollRef}
-        className="h-72 overflow-auto bg-bg px-3 py-2 font-mono text-[11px] leading-relaxed text-muted"
+        className="h-72 overflow-auto bg-bg px-3 py-2 font-mono text-xs leading-relaxed text-muted"
       >
         {error && <div className="text-danger">{error}</div>}
         {!error && shown && shown.length === 0 && <div className="text-faint">(sin líneas)</div>}

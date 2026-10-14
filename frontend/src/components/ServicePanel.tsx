@@ -42,7 +42,7 @@ export const PANEL_MAX_WIDTH = 520;
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="space-y-2">
-      <h3 className="font-mono text-[11px] font-semibold tracking-[0.2em] text-faint uppercase">
+      <h3 className="font-mono text-xs font-semibold tracking-[0.2em] text-faint uppercase">
         {title}
       </h3>
       {children}
@@ -53,9 +53,9 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 function Metric({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
     <div className="rounded-lg border border-line bg-surface-2 px-3 py-2">
-      <div className="font-mono text-[11px] text-faint">{label}</div>
+      <div className="font-mono text-xs text-faint">{label}</div>
       <div className="font-mono text-base font-semibold text-ink">{value}</div>
-      {sub && <div className="font-mono text-[11px] text-faint">{sub}</div>}
+      {sub && <div className="font-mono text-xs text-faint">{sub}</div>}
     </div>
   );
 }
@@ -100,7 +100,7 @@ function LiveMetrics({ name, running }: { name: string; running: boolean }) {
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div className="rounded-lg border border-line bg-surface-2 p-3">
-          <div className="mb-2 font-mono text-[11px] text-faint">CPU % · 60 s</div>
+          <div className="mb-2 font-mono text-xs text-faint">CPU % · 60 s</div>
           <MiniChart
             values={samples.map((s) => s.cpu_pct)}
             labels={labels}
@@ -112,7 +112,7 @@ function LiveMetrics({ name, running }: { name: string; running: boolean }) {
           />
         </div>
         <div className="rounded-lg border border-line bg-surface-2 p-3">
-          <div className="mb-2 font-mono text-[11px] text-faint">RAM MB · 60 s</div>
+          <div className="mb-2 font-mono text-xs text-faint">RAM MB · 60 s</div>
           <MiniChart
             values={samples.map((s) => s.mem_mb)}
             labels={labels}
@@ -126,7 +126,7 @@ function LiveMetrics({ name, running }: { name: string; running: boolean }) {
         </div>
       </div>
       {latest && (
-        <p className="font-mono text-[11px] text-faint">
+        <p className="font-mono text-xs text-faint">
           total red: ↓ {formatBytes(latest.net_rx_b)} · ↑ {formatBytes(latest.net_tx_b)}
         </p>
       )}
@@ -206,7 +206,7 @@ function ContainerSections({
               <DepButton key={dep} dep={dep} tools={tools} onSelect={onSelect} />
             ))}
             {detail.detected.includes('depends_on') && (
-              <span className="text-[11px] text-faint">· incluye el depends_on de Compose</span>
+              <span className="text-xs text-faint">· incluye el depends_on de Compose</span>
             )}
           </div>
         </Section>
@@ -252,21 +252,21 @@ function ContainerSections({
         )}
         {detail.url && running && <ExternalLink href={detail.url} label="Abrir UI" />}
         {urlDetected && (
-          <p className="font-mono text-[11px] text-faint">
+          <p className="font-mono text-xs text-faint">
             enlace deducido del puerto publicado · fíjalo con el label dis.url
           </p>
         )}
       </Section>
 
       <details className="space-y-2">
-        <summary className="cursor-pointer pointer-coarse:min-h-10 font-mono text-[11px] font-semibold tracking-[0.2em] text-faint uppercase">
+        <summary className="cursor-pointer pointer-coarse:min-h-10 font-mono text-xs font-semibold tracking-[0.2em] text-faint uppercase">
           Variables de entorno ({detail.env.length})
         </summary>
         {detail.env.length === 0 ? (
           <p className="text-sm text-muted">Sin variables.</p>
         ) : (
           <div className="max-h-60 overflow-auto rounded-lg border border-line">
-            <table className="w-full font-mono text-[11px]">
+            <table className="w-full font-mono text-xs">
               <tbody>
                 {detail.env.map((e) => (
                   <tr key={e.key} className="border-b border-line last:border-0 align-top">

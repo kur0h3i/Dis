@@ -113,7 +113,7 @@ export function ContainerCard({
             {published.map((p) => (
               <span
                 key={`${p.host_port}-${p.container_port}-${p.protocol}`}
-                className="rounded bg-surface-2 px-1.5 py-0.5 font-mono text-[11px] text-muted"
+                className="rounded bg-surface-2 px-1.5 py-0.5 font-mono text-xs text-muted"
                 title={p.host_ip ? `${p.host_ip}:${p.host_port}` : undefined}
               >
                 {formatPort(p)}

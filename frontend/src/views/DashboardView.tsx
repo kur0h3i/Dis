@@ -62,7 +62,7 @@ function SectionTitle({
 }) {
   return (
     <div className="mb-3 flex items-baseline justify-between gap-4">
-      <h2 className="font-mono text-xs font-semibold tracking-[0.2em] text-faint uppercase">
+      <h2 className="font-mono text-[13px] font-semibold tracking-[0.2em] text-muted uppercase">
         {title}
       </h2>
       <div className="flex items-baseline gap-3">
@@ -183,9 +183,9 @@ function ContainerGroup({
         onClick={onToggle ? undefined : (e) => e.preventDefault()}
         className="mb-2 flex cursor-pointer list-none items-center gap-2 pointer-coarse:min-h-10"
       >
-        <span className="font-mono text-[11px] text-faint">{open ? '▾' : '▸'}</span>
-        <span className="font-mono text-[11px] text-faint">{label}</span>
-        <span className="font-mono text-[11px] text-faint">· {items.length}</span>
+        <span className="font-mono text-xs text-faint">{open ? '▾' : '▸'}</span>
+        <span className="font-mono text-xs text-faint">{label}</span>
+        <span className="font-mono text-xs text-faint">· {items.length}</span>
         <span className="h-px flex-1 bg-line" />
       </summary>
       {items.length === 0 ? (
