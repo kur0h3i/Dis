@@ -25,12 +25,12 @@ import { PANEL_MAX_WIDTH } from '../components/ServicePanel';
 import { ServiceNode, type ServiceFlowNode } from '../components/ServiceNode';
 import { isDown, STATUS_COLOR } from '../lib/format';
 import {
+  countByGroup,
   loadHiddenGroups,
   matchesQuery,
   neighborMap,
   normalizeText,
   saveHiddenGroups,
-  STATUS_GROUPS,
   type StatusGroup,
   statusGroup,
 } from '../lib/graphFocus';
@@ -156,14 +156,10 @@ function MapCanvas({ theme, selection, onSelect }: Props) {
   const hoveredId = hovered && graph.data?.nodes.some((n) => n.id === hovered) ? hovered : null;
   const focusId = hoveredId ?? (q ? null : selectedId);
 
-  const counts = useMemo(() => {
-    const out = Object.fromEntries(STATUS_GROUPS.map((g) => [g.group, 0])) as Record<
-      StatusGroup,
-      number
-    >;
-    for (const n of graph.data?.nodes ?? []) out[statusGroup(n.status)]++;
-    return out;
-  }, [graph.data]);
+  const counts = useMemo(
+    () => countByGroup(graph.data?.nodes.map((n) => n.status) ?? []),
+    [graph.data],
+  );
 
   // Con foco se ven el nodo y sus vecinos directos; con búsqueda, las coincidencias.
   const displayNodes = useMemo(() => {

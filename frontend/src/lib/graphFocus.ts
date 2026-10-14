@@ -28,6 +28,16 @@ export function statusGroup(status: ToolStatus): StatusGroup {
   }
 }
 
+/** Recuento de estados por grupo de la leyenda (todos los grupos, con 0 si no hay). */
+export function countByGroup(statuses: ToolStatus[]): Record<StatusGroup, number> {
+  const out = Object.fromEntries(STATUS_GROUPS.map((g) => [g.group, 0])) as Record<
+    StatusGroup,
+    number
+  >;
+  for (const s of statuses) out[statusGroup(s)]++;
+  return out;
+}
+
 const HIDDEN_KEY = 'dis_graph_hidden';
 
 export function loadHiddenGroups(): Set<StatusGroup> {

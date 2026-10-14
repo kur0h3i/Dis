@@ -1,11 +1,16 @@
 import { useState } from 'react';
 import type { Alerts, ContainerSummary, Resources, Selection, Tool } from '../api/types';
+import { useGraph } from '../api/hooks';
 import { AlertsPanel } from '../components/AlertsPanel';
 import { ContainerCard } from '../components/ContainerCard';
+import { MapLegend } from '../components/MapLegend';
+import { MapSearch } from '../components/MapSearch';
 import { MiniChart } from '../components/MiniChart';
 import { ResourceBar } from '../components/ResourceBar';
 import { ToolCard } from '../components/ToolCard';
 import { formatAge, isProblem, STATUS_LABEL } from '../lib/format';
+import { countByGroup, type StatusGroup, statusGroup } from '../lib/graphFocus';
+import { selectionFor } from '../lib/selection';
 import {
   familyOpenByDefault,
   groupByFamily,
@@ -272,8 +277,15 @@ export function DashboardView({
 }: Props) {
   const [sortMode, setSortMode] = useState(readSortMode);
   const [familyOpen, setFamilyOpen] = useState(readFamilyOpen);
+  const graph = useGraph();
+  const [query, setQuery] = useState('');
+  // No se recuerda: al recargar podrían faltar contenedores sin aviso.
+  const [hidden, setHidden] = useState<Set<StatusGroup>>(() => new Set());
   const rawList = containers.data ?? [];
-  const list = sortContainers(rawList, sortMode);
+  const list = sortContainers(
+    rawList.filter((c) => !hidden.has(statusGroup(c.status))),
+    sortMode,
+  );
   const activeCount = rawList.filter(isActive).length;
   const selectedContainer = selection?.kind === 'container' ? selection.name : null;
 
@@ -295,6 +307,17 @@ export function DashboardView({
           onSelect={onSelect}
         />
       )}
+      <div className="font-mono text-xs text-muted sm:max-w-sm">
+        <MapSearch
+          nodes={graph.data?.nodes ?? []}
+          query={query}
+          onQueryChange={setQuery}
+          onPick={(n) => {
+            setQuery('');
+            onSelect(selectionFor(n));
+          }}
+        />
+      </div>
       <section>
         <SectionTitle title="Recursos del servidor" meta="cada 10 s · últimos 5 min" />
         <ResourcesSection q={resources} />
@@ -345,6 +368,21 @@ export function DashboardView({
           }
         />
         {containers.error && <ErrorBox message={containers.error.message} />}
+        {rawList.length > 0 && (
+          <div className="mb-3">
+            <MapLegend
+              counts={countByGroup(rawList.map((c) => c.status))}
+              hidden={hidden}
+              onToggle={(g) =>
+                setHidden((prev) => {
+                  const next = new Set(prev);
+                  if (!next.delete(g)) next.add(g);
+                  return next;
+                })
+              }
+            />
+          </div>
+        )}
         {!containers.data && !containers.error && (
           <div className="grid grid-cols-1 gap-4 @xl:grid-cols-2 @4xl:grid-cols-3">
             <Skeleton className="h-36" />
@@ -352,8 +390,11 @@ export function DashboardView({
             <Skeleton className="h-36" />
           </div>
         )}
-        {containers.data && list.length === 0 && (
+        {containers.data && rawList.length === 0 && (
           <p className="text-sm text-muted">No hay contenedores.</p>
+        )}
+        {rawList.length > 0 && list.length === 0 && (
+          <p className="text-sm text-muted">Ningún contenedor con estos filtros.</p>
         )}
         {list.length > 0 &&
           (sortMode === 'active-first' ? (

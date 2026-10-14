@@ -89,7 +89,7 @@ export function MapSearch({ nodes, query, onQueryChange, onPick }: Props) {
         ref={inputRef}
         type="text"
         role="combobox"
-        aria-label="Buscar servicio en el mapa"
+        aria-label="Buscar servicio"
         aria-expanded={expanded}
         aria-controls={listId}
         aria-autocomplete="list"
