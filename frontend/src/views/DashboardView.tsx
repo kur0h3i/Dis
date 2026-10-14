@@ -134,7 +134,7 @@ function ContainerGroup({
       {items.length === 0 ? (
         <p className="font-mono text-xs text-faint">{emptyText}</p>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 @xl:grid-cols-2 @4xl:grid-cols-3">
           {items.map((c) => (
             <ContainerCard
               key={c.id}
@@ -153,7 +153,7 @@ function ResourcesSection({ q }: { q: Query<Resources> }) {
   if (q.error && !q.data) return <ErrorBox message={`Recursos: ${q.error.message}`} />;
   if (!q.data) {
     return (
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 @2xl:grid-cols-3">
         <Skeleton className="h-40" />
         <Skeleton className="h-40" />
         <Skeleton className="h-40" />
@@ -163,7 +163,7 @@ function ResourcesSection({ q }: { q: Query<Resources> }) {
   const r = q.data;
   const labels = r.history_5m.map((s) => timeLabel(s.ts));
   return (
-    <div className="grid gap-4 md:grid-cols-3">
+    <div className="grid gap-4 @2xl:grid-cols-3">
       <div className="flex flex-col gap-3 rounded-lg border border-line bg-surface p-4">
         <div className="flex items-baseline justify-between">
           <span className="font-mono text-xs text-muted">CPU</span>
@@ -251,7 +251,7 @@ export function DashboardView({
   };
 
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-10 px-4 py-6 sm:px-6">
+    <div className="@container mx-auto flex max-w-7xl flex-col gap-10 px-4 py-6 sm:px-6">
       {containers.data && !containers.error && (
         <HealthBand containers={containers.data} alerts={alerts.data} onSelect={onSelect} />
       )}
@@ -263,7 +263,7 @@ export function DashboardView({
       <section>
         <SectionTitle title="Herramientas" meta="ecosistema server-kuro" />
         {tools.error && <ErrorBox message={tools.error.message} />}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 @xl:grid-cols-2 @4xl:grid-cols-3">
           {!tools.data && !tools.error && (
             <>
               <Skeleton className="h-28" />
@@ -307,7 +307,7 @@ export function DashboardView({
         />
         {containers.error && <ErrorBox message={containers.error.message} />}
         {!containers.data && !containers.error && (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 @xl:grid-cols-2 @4xl:grid-cols-3">
             <Skeleton className="h-36" />
             <Skeleton className="h-36" />
             <Skeleton className="h-36" />
@@ -335,7 +335,7 @@ export function DashboardView({
               />
             </div>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 @xl:grid-cols-2 @4xl:grid-cols-3">
               {list.map((c) => (
                 <ContainerCard
                   key={c.id}
