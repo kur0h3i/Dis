@@ -25,6 +25,8 @@ interface Props {
   tools: Tool[] | undefined;
   containers: ContainerSummary[] | undefined;
   onSelect: (s: Selection) => void;
+  view: 'dashboard' | 'map';
+  onToggleView: () => void;
   onClose: () => void;
 }
 
@@ -214,6 +216,8 @@ function ContainerSections({
         <LiveMetrics name={detail.name} running={running} />
       </Section>
 
+      {/* TODO: start / stop / restart — fuera del MVP. Necesita el endpoint
+          POST /api/containers/{id}/{accion} (ver docker_service.py) y auth. */}
       <Section title="Puertos">
         {detail.ports.length === 0 ? (
           <p className="text-sm text-muted">Sin puertos expuestos.</p>
@@ -247,6 +251,11 @@ function ContainerSections({
           </table>
         )}
         {detail.url && running && <ExternalLink href={detail.url} label="Abrir UI" />}
+        {urlDetected && (
+          <p className="font-mono text-[11px] text-faint">
+            enlace deducido del puerto publicado · fíjalo con el label dis.url
+          </p>
+        )}
       </Section>
 
       <details className="space-y-2">
@@ -277,28 +286,18 @@ function ContainerSections({
       </details>
 
       {!urgent && logs}
-
-      <Section title="Acciones">
-        <div className="flex flex-wrap gap-2">
-          {detail.url && running ? (
-            <ExternalLink href={detail.url} label="Abrir UI" />
-          ) : (
-            <span className="text-sm text-faint">Sin UI web configurada.</span>
-          )}
-          {urlDetected && (
-            <span className="self-center font-mono text-[11px] text-faint">
-              enlace deducido del puerto publicado · fíjalo con el label dis.url
-            </span>
-          )}
-          {/* TODO: start / stop / restart — fuera del MVP. Necesita el endpoint
-              POST /api/containers/{id}/{accion} (ver docker_service.py) y auth. */}
-        </div>
-      </Section>
     </>
   );
 }
 
-function PanelBody({ selection, tools, containers, onSelect }: Omit<Props, 'onClose'>) {
+function PanelBody({
+  selection,
+  tools,
+  containers,
+  onSelect,
+  view,
+  onToggleView,
+}: Omit<Props, 'onClose'>) {
   const tool =
     selection?.kind === 'tool'
       ? tools?.find((t) => t.id === selection.id)
@@ -332,6 +331,13 @@ function PanelBody({ selection, tools, containers, onSelect }: Omit<Props, 'onCl
           {d && <span>activo: {formatUptime(d.uptime_s)}</span>}
           {d?.health && <span>health: {d.health}</span>}
           {d && <span className="text-faint">id {d.id}</span>}
+          <button
+            type="button"
+            onClick={onToggleView}
+            className="pointer-coarse:min-h-10 text-accent-ink hover:underline"
+          >
+            {view === 'map' ? 'ver en el dashboard' : 'ver en el mapa'} →
+          </button>
         </div>
       </header>
 
@@ -381,7 +387,15 @@ function PanelBody({ selection, tools, containers, onSelect }: Omit<Props, 'onCl
  * Panel lateral deslizante (no modal): el resto de la página sigue usable.
  * Se cierra con Escape o con un clic fuera que no sea sobre otra tarjeta/nodo.
  */
-export function ServicePanel({ selection, tools, containers, onSelect, onClose }: Props) {
+export function ServicePanel({
+  selection,
+  tools,
+  containers,
+  onSelect,
+  view,
+  onToggleView,
+  onClose,
+}: Props) {
   const open = selection != null;
   const panelRef = useRef<HTMLElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -469,6 +483,8 @@ export function ServicePanel({ selection, tools, containers, onSelect, onClose }
             tools={tools}
             containers={containers}
             onSelect={onSelect}
+            view={view}
+            onToggleView={onToggleView}
           />
         )}
       </div>

@@ -142,6 +142,8 @@ export default function App() {
         tools={tools.data}
         containers={containers.data}
         onSelect={setSelection}
+        view={view}
+        onToggleView={() => setView(view === 'map' ? 'dashboard' : 'map')}
         onClose={closePanel}
       />
 
