@@ -6,7 +6,16 @@ import { MiniChart } from '../components/MiniChart';
 import { ResourceBar } from '../components/ResourceBar';
 import { ToolCard } from '../components/ToolCard';
 import { formatAge, isProblem, STATUS_LABEL } from '../lib/format';
-import { isActive, readSortMode, saveSortMode, sortContainers } from '../lib/sortContainers';
+import {
+  familyOpenByDefault,
+  groupByFamily,
+  isActive,
+  readFamilyOpen,
+  readSortMode,
+  saveFamilyOpen,
+  saveSortMode,
+  sortContainers,
+} from '../lib/sortContainers';
 
 // Muestras de 10 s en 5 minutos: la sparkline crece de derecha a izquierda.
 const HISTORY_SLOTS = 30;
@@ -125,20 +134,33 @@ function ContainerGroup({
   selectedContainer,
   onSelect,
   emptyText,
+  open,
+  onToggle,
 }: {
   label: string;
   items: ContainerSummary[];
   selectedContainer: string | null;
   onSelect: (s: Selection) => void;
   emptyText: string;
+  open: boolean;
+  /** Sin él, el grupo no se pliega. */
+  onToggle?: (open: boolean) => void;
 }) {
+  // `toggle` también salta cuando React abre el grupo solo: solo cuenta si difiere de la prop.
   return (
-    <div>
-      <div className="mb-2 flex items-center gap-2">
+    <details
+      open={open}
+      onToggle={(e) => e.currentTarget.open !== open && onToggle?.(e.currentTarget.open)}
+    >
+      <summary
+        onClick={onToggle ? undefined : (e) => e.preventDefault()}
+        className="mb-2 flex cursor-pointer list-none items-center gap-2 pointer-coarse:min-h-10"
+      >
+        <span className="font-mono text-[11px] text-faint">{open ? '▾' : '▸'}</span>
         <span className="font-mono text-[11px] text-faint">{label}</span>
         <span className="font-mono text-[11px] text-faint">· {items.length}</span>
         <span className="h-px flex-1 bg-line" />
-      </div>
+      </summary>
       {items.length === 0 ? (
         <p className="font-mono text-xs text-faint">{emptyText}</p>
       ) : (
@@ -154,7 +176,7 @@ function ContainerGroup({
           ))}
         </div>
       )}
-    </div>
+    </details>
   );
 }
 
@@ -249,6 +271,7 @@ export function DashboardView({
   onSelect,
 }: Props) {
   const [sortMode, setSortMode] = useState(readSortMode);
+  const [familyOpen, setFamilyOpen] = useState(readFamilyOpen);
   const rawList = containers.data ?? [];
   const list = sortContainers(rawList, sortMode);
   const activeCount = rawList.filter(isActive).length;
@@ -341,6 +364,7 @@ export function DashboardView({
                 selectedContainer={selectedContainer}
                 onSelect={onSelect}
                 emptyText="Ninguno en marcha con UI web."
+                open
               />
               <ContainerGroup
                 label="Pasivos · sin UI web"
@@ -348,17 +372,28 @@ export function DashboardView({
                 selectedContainer={selectedContainer}
                 onSelect={onSelect}
                 emptyText="Ninguno."
+                open
               />
             </div>
           ) : (
-            <div className="grid grid-cols-1 items-start gap-4 @xl:grid-cols-2 @4xl:grid-cols-3">
-              {list.map((c) => (
-                <ContainerCard
-                  key={c.id}
-                  container={c}
-                  selected={selectedContainer === c.name}
-                  compact={!isActive(c)}
-                  onSelect={(name) => onSelect({ kind: 'container', name })}
+            <div className="space-y-6">
+              {groupByFamily(list).map((f) => (
+                <ContainerGroup
+                  key={f.key}
+                  label={f.label}
+                  items={f.items}
+                  selectedContainer={selectedContainer}
+                  onSelect={onSelect}
+                  emptyText=""
+                  open={
+                    f.items.some((c) => c.name === selectedContainer) ||
+                    (familyOpen[f.key] ?? familyOpenByDefault(f.items))
+                  }
+                  onToggle={(o) => {
+                    const next = { ...familyOpen, [f.key]: o };
+                    setFamilyOpen(next);
+                    saveFamilyOpen(next);
+                  }}
                 />
               ))}
             </div>
