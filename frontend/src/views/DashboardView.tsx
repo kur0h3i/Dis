@@ -31,6 +31,7 @@ interface Query<T> {
   isLoading: boolean;
   dataUpdatedAt: number;
   errorUpdatedAt: number;
+  refetch: () => unknown;
 }
 
 interface Props {
@@ -72,10 +73,31 @@ function SectionTitle({
   );
 }
 
-function ErrorBox({ message }: { message: string }) {
+function ErrorBox({
+  title,
+  q,
+}: {
+  title: string;
+  q: Pick<Query<unknown>, 'error' | 'dataUpdatedAt' | 'refetch'>;
+}) {
   return (
-    <div className="rounded-lg border border-danger/40 bg-danger/5 p-4 font-mono text-xs text-danger">
-      {message}
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-danger/40 bg-danger/5 p-4 font-mono text-xs text-danger">
+      <div className="min-w-0 flex-1">
+        <div className="font-semibold">{title}</div>
+        <div>{q.error?.message}</div>
+        {q.dataUpdatedAt > 0 && (
+          <div className="text-muted">
+            último dato bueno: {new Date(q.dataUpdatedAt).toLocaleTimeString()}
+          </div>
+        )}
+      </div>
+      <button
+        type="button"
+        onClick={() => void q.refetch()}
+        className="pointer-coarse:min-h-10 rounded-md border border-danger/40 px-2 py-1 hover:bg-danger/10"
+      >
+        Reintentar
+      </button>
     </div>
   );
 }
@@ -186,7 +208,7 @@ function ContainerGroup({
 }
 
 function ResourcesSection({ q }: { q: Query<Resources> }) {
-  if (q.error && !q.data) return <ErrorBox message={`Recursos: ${q.error.message}`} />;
+  if (q.error && !q.data) return <ErrorBox title="Recursos no disponibles" q={q} />;
   if (!q.data) {
     return (
       <div className="grid grid-cols-2 gap-4 @2xl:grid-cols-3">
@@ -325,7 +347,7 @@ export function DashboardView({
 
       <section>
         <SectionTitle title="Herramientas" meta="ecosistema server-kuro" />
-        {tools.error && <ErrorBox message={tools.error.message} />}
+        {tools.error && <ErrorBox title="Herramientas no disponibles" q={tools} />}
         <div className="grid grid-cols-1 gap-4 @xl:grid-cols-2 @4xl:grid-cols-3">
           {!tools.data && !tools.error && (
             <>
@@ -367,7 +389,7 @@ export function DashboardView({
             ) : undefined
           }
         />
-        {containers.error && <ErrorBox message={containers.error.message} />}
+        {containers.error && <ErrorBox title="Contenedores no disponibles" q={containers} />}
         {rawList.length > 0 && (
           <div className="mb-3">
             <MapLegend
