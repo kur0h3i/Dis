@@ -38,11 +38,11 @@ export default function App() {
         data-dis-selectable
         className="sticky top-0 z-30 h-14 border-b border-line bg-bg/85 backdrop-blur"
       >
-        <div className="mx-auto flex h-full max-w-7xl items-center gap-4 px-4 sm:px-6">
+        <div className="mx-auto flex h-full max-w-7xl items-center gap-2 px-4 sm:gap-4 sm:px-6">
           <div className="flex items-center gap-2">
             {/* La ciudad de Dis del Infierno de Dante: murallas al rojo sobre la Estigia. */}
             <img src={logo} alt="" className="h-8 w-8" />
-            <span className="font-mono text-lg font-bold tracking-[0.3em] text-accent-ink">
+            <span className="hidden font-mono text-lg font-bold tracking-[0.3em] text-accent-ink min-[400px]:inline">
               DIS
             </span>
             <span className="hidden font-mono text-xs text-faint sm:inline">server-kuro</span>
@@ -66,7 +66,7 @@ export default function App() {
                 type="button"
                 onClick={() => setView(v)}
                 aria-pressed={view === v}
-                className={`rounded-md px-3 py-1.5 transition-colors ${
+                className={`min-h-9 rounded-md px-2 py-1.5 transition-colors sm:min-h-0 sm:px-3 ${
                   view === v ? 'bg-accent text-white' : 'text-muted hover:text-ink'
                 }`}
               >
@@ -80,16 +80,17 @@ export default function App() {
               type="button"
               onClick={() => setAdding(true)}
               title={`dis.yaml no se pudo recargar: ${config.data.error}`}
-              className="font-mono text-[11px] text-danger hover:underline"
+              aria-label="dis.yaml no se pudo recargar"
+              className="flex min-h-10 min-w-10 items-center justify-center font-mono text-[11px] text-danger hover:underline sm:min-h-0 sm:min-w-0"
             >
-              ⚠ dis.yaml
+              ⚠<span className="hidden sm:inline"> dis.yaml</span>
             </button>
           )}
 
           <button
             type="button"
             onClick={() => setAdding(true)}
-            className="rounded-lg border border-line bg-surface px-2.5 py-1.5 font-mono text-xs text-muted hover:text-ink"
+            className="flex min-h-10 min-w-10 items-center justify-center rounded-lg border border-line bg-surface px-2.5 py-1.5 font-mono text-xs text-muted hover:text-ink sm:min-h-0 sm:min-w-0"
             aria-label="Añadir servicio"
             title="Añadir servicio"
           >
@@ -99,7 +100,7 @@ export default function App() {
           <button
             type="button"
             onClick={toggleTheme}
-            className="rounded-lg border border-line bg-surface px-2.5 py-1.5 font-mono text-xs text-muted hover:text-ink"
+            className="flex min-h-10 min-w-10 items-center justify-center rounded-lg border border-line bg-surface px-2.5 py-1.5 font-mono text-xs text-muted hover:text-ink sm:min-h-0 sm:min-w-0"
             aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
             title={theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}
           >
