@@ -382,10 +382,15 @@ export function ServicePanel({ selection, tools, containers, onSelect, onClose }
       prev.isConnected &&
       (active === document.body || panelRef.current?.contains(active))
     ) {
-      prev.focus();
+      prev.focus({ preventScroll: true });
     }
     returnFocusRef.current = null;
   }, [open]);
+
+  // Pulsar una dependencia remonta PanelBody y el foco cae en <body>: lo devolvemos al panel.
+  useEffect(() => {
+    if (open && document.activeElement === document.body) closeRef.current?.focus();
+  }, [shown, open]);
 
   useEffect(() => {
     if (!open) return;
