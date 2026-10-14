@@ -74,6 +74,9 @@ Dockerfile · docker-compose.yml
 - Fuente **monoespaciada para datos** (nombres, puertos, métricas, logs); sans para el cuerpo.
 - Estados: running `#22c55e`, stopped/exited `#6b7280`, restarting/paused `#eab308`,
   unhealthy `#ef4444`. En el mapa, aristas moradas; naranja `#f97316` si el destino está caído.
+- Tokens de estado `--ok/--warn/--danger` en `index.css` (en claro más oscuros por contraste). Los
+  hex de `STATUS_COLOR` se quedan en JS porque el MiniMap pinta en canvas.
+- Fuentes autoalojadas con `@fontsource-variable` (`Inter Variable`, `JetBrains Mono Variable`).
 - **Oscuro por defecto**, claro opcional (misma paleta sobre `#f8f8f8`).
 - El logo (`frontend/src/assets/dis-logo.svg`) es la ciudad amurallada en llamas sobre la Estigia.
 
@@ -106,16 +109,15 @@ Las env vars con PASSWORD/SECRET/KEY/TOKEN se devuelven como `***`.
   (Vite hace proxy de `/api` a `:8000`).
 - **Calidad** antes de dar por bueno un cambio:
   - backend: `cd backend && .venv/bin/ruff check . && .venv/bin/ruff format --check . && .venv/bin/pytest`
-  - frontend: `cd frontend && npm run lint && npm run build` (incluye typecheck) y `npx prettier --check "src/**/*.{ts,tsx,css}"`
+  - frontend: `cd frontend && npm run lint && npm run build` (incluye typecheck), `npm test` y `npx prettier --check "src/**/*.{ts,tsx,css}"`
 
 ## Convenciones
 - Código, comentarios y mensajes de commit **en español**. Un commit por paso, mensaje claro.
-- Rama de trabajo actual: `claude/brave-fermat-0a8lyf`. No hacer push sin que lo pida el usuario.
+- Rama de trabajo actual: `mejora/ui-ux` (base `claude/blissful-bell-o8555z`). No hacer push sin que lo pida el usuario.
 
 ## En curso / pendiente
-- **Rediseño UI/UX** (en marcha). El diagnóstico del arquitecto apunta a: cargar de verdad las
-  fuentes (hoy `Inter`/`JetBrains Mono` se nombran pero no se cargan), tokens semánticos de color,
-  respetar `prefers-reduced-motion`, subir contraste, franja de salud en el dashboard, codificar
-  severidad en las tarjetas, y mejoras de móvil/accesibilidad. Mantener morado + tema Dante.
+- Rediseño UI/UX cerrado en la rama `mejora/ui-ux` (pendiente de PR): tokens, fuentes, reduced-motion,
+  contraste, severidad en tarjetas, franja de salud, foco del panel y cabecera móvil.
+- Capturas `docs/*.png` sin regenerar (hace falta el servidor real).
 - TODOs de producto: acciones start/stop/restart (con auth antes), autenticación de Dis, Cerbero en
   vivo, health-check HTTP de herramientas sin contenedor.
