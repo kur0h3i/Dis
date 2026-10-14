@@ -12,6 +12,7 @@ export function MapLegend({ counts, hidden, onToggle }: Props) {
     <div className="flex flex-wrap gap-1" role="group" aria-label="Filtrar por estado">
       {STATUS_GROUPS.map(({ group, label, color }) => {
         const off = hidden.has(group);
+        if (counts[group] === 0 && !off) return null;
         return (
           <button
             key={group}
