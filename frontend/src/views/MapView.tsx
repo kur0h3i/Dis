@@ -59,6 +59,9 @@ const FIT_VIEW: FitViewOptions = {
   maxZoom: 1,
 };
 
+// En móvil se arranca más cerca para que los nombres se lean; encajar y Reordenar ven todo el mapa.
+const INITIAL_FIT: FitViewOptions = NARROW ? { ...FIT_VIEW, minZoom: 0.5 } : FIT_VIEW;
+
 const nodeTypes: NodeTypes = { service: ServiceNode };
 
 interface Props {
@@ -311,7 +314,7 @@ function MapCanvas({ theme, selection, onSelect }: Props) {
         onPaneClick={() => setHovered(null)}
         colorMode={theme}
         fitView
-        fitViewOptions={FIT_VIEW}
+        fitViewOptions={INITIAL_FIT}
         minZoom={0.2}
         maxZoom={2}
         nodesConnectable={false}
