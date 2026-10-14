@@ -69,3 +69,10 @@ export function severityEdge(status: ToolStatus): string {
     return 'border-l-4 border-l-warn hover:border-l-warn';
   return '';
 }
+
+/** Antigüedad legible de un dato: "hace menos de 1 min", "hace 5 min", "hace 2 h". */
+export function formatAge(ms: number): string {
+  if (ms < 60_000) return 'hace menos de 1 min';
+  if (ms < 3_600_000) return `hace ${Math.floor(ms / 60_000)} min`;
+  return `hace ${Math.floor(ms / 3_600_000)} h`;
+}

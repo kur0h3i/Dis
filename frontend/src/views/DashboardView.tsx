@@ -5,7 +5,7 @@ import { ContainerCard } from '../components/ContainerCard';
 import { MiniChart } from '../components/MiniChart';
 import { ResourceBar } from '../components/ResourceBar';
 import { ToolCard } from '../components/ToolCard';
-import { STATUS_LABEL } from '../lib/format';
+import { formatAge, STATUS_LABEL } from '../lib/format';
 import { isActive, readSortMode, saveSortMode, sortContainers } from '../lib/sortContainers';
 
 // Muestras de 10 s en 5 minutos: la sparkline crece de derecha a izquierda.
@@ -15,6 +15,8 @@ interface Query<T> {
   data: T | undefined;
   error: Error | null;
   isLoading: boolean;
+  dataUpdatedAt: number;
+  errorUpdatedAt: number;
 }
 
 interface Props {
@@ -67,10 +69,12 @@ function ErrorBox({ message }: { message: string }) {
 function HealthBand({
   containers,
   alerts,
+  staleFor,
   onSelect,
 }: {
   containers: ContainerSummary[];
   alerts: Alerts | undefined;
+  staleFor: number | null;
   onSelect: (s: Selection) => void;
 }) {
   const running = containers.filter((c) => c.status === 'running').length;
@@ -95,6 +99,9 @@ function HealthBand({
             {c.name} · {STATUS_LABEL[c.status]}
           </button>
         ))
+      )}
+      {staleFor !== null && (
+        <span className="text-warn">Docker sin actualizar · dato de {formatAge(staleFor)}</span>
       )}
       {alerts && (
         <span className="text-muted sm:ml-auto">
@@ -252,8 +259,13 @@ export function DashboardView({
 
   return (
     <div className="@container mx-auto flex max-w-7xl flex-col gap-10 px-4 py-6 sm:px-6">
-      {containers.data && !containers.error && (
-        <HealthBand containers={containers.data} alerts={alerts.data} onSelect={onSelect} />
+      {containers.data && (
+        <HealthBand
+          containers={containers.data}
+          alerts={alerts.data}
+          staleFor={containers.error ? containers.errorUpdatedAt - containers.dataUpdatedAt : null}
+          onSelect={onSelect}
+        />
       )}
       <section>
         <SectionTitle title="Recursos del servidor" meta="cada 10 s · últimos 5 min" />
