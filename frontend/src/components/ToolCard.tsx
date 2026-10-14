@@ -41,7 +41,7 @@ export function ToolCard({ tool: t, onSelect }: Props) {
 
   if (!operational) {
     return (
-      <div className={`${base} opacity-50 grayscale`} aria-disabled>
+      <div className={`${base} border-dashed bg-transparent!`} aria-disabled>
         {body}
       </div>
     );
