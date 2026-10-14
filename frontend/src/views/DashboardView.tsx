@@ -5,6 +5,7 @@ import { ContainerCard } from '../components/ContainerCard';
 import { MiniChart } from '../components/MiniChart';
 import { ResourceBar } from '../components/ResourceBar';
 import { ToolCard } from '../components/ToolCard';
+import { STATUS_LABEL } from '../lib/format';
 import { isActive, readSortMode, saveSortMode, sortContainers } from '../lib/sortContainers';
 
 // Muestras de 10 s en 5 minutos: la sparkline crece de derecha a izquierda.
@@ -59,6 +60,47 @@ function ErrorBox({ message }: { message: string }) {
   return (
     <div className="rounded-lg border border-danger/40 bg-danger/5 p-4 font-mono text-xs text-danger">
       {message}
+    </div>
+  );
+}
+
+function HealthBand({
+  containers,
+  alerts,
+  onSelect,
+}: {
+  containers: ContainerSummary[];
+  alerts: Alerts | undefined;
+  onSelect: (s: Selection) => void;
+}) {
+  const running = containers.filter((c) => c.status === 'running').length;
+  const problems = containers.filter((c) =>
+    ['unhealthy', 'restarting', 'paused'].includes(c.status),
+  );
+  return (
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-line bg-surface px-4 py-3 font-mono text-xs">
+      <span className="text-muted">
+        {running}/{containers.length} en marcha
+      </span>
+      {problems.length === 0 ? (
+        <span className="text-ok">Todo en orden</span>
+      ) : (
+        problems.map((c) => (
+          <button
+            key={c.name}
+            type="button"
+            onClick={() => onSelect({ kind: 'container', name: c.name })}
+            className={`hover:underline ${c.status === 'unhealthy' ? 'text-danger' : 'text-warn'}`}
+          >
+            {c.name} · {STATUS_LABEL[c.status]}
+          </button>
+        ))
+      )}
+      {alerts && (
+        <span className="text-muted sm:ml-auto">
+          {alerts.connected ? `Cerbero: ${alerts.alerts.length} alertas` : 'Cerbero: sin conexión'}
+        </span>
+      )}
     </div>
   );
 }
@@ -208,6 +250,9 @@ export function DashboardView({
 
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-10 px-4 py-6 sm:px-6">
+      {containers.data && !containers.error && (
+        <HealthBand containers={containers.data} alerts={alerts.data} onSelect={onSelect} />
+      )}
       <section>
         <SectionTitle title="Recursos del servidor" meta="cada 10 s · últimos 5 min" />
         <ResourcesSection q={resources} />
