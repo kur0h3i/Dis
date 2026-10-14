@@ -1,6 +1,7 @@
 import { type KeyboardEvent, useEffect, useId, useRef, useState } from 'react';
 import type { GraphNode } from '../api/types';
 import { matchesQuery, normalizeText } from '../lib/graphFocus';
+import { ServiceIcon } from './ServiceIcon';
 import { StatusDot } from './StatusDot';
 
 const MAX_RESULTS = 6;
@@ -146,6 +147,7 @@ export function MapSearch({ nodes, query, onQueryChange, onPick }: Props) {
                   i === current ? 'bg-surface-2 text-ink' : 'text-muted'
                 }`}
               >
+                <ServiceIcon icons={n.icons} name={n.label} size={16} />
                 <StatusDot status={n.status} />
                 <span className="truncate">{n.label}</span>
                 <span className="ml-auto shrink-0 text-[10px] text-faint uppercase">

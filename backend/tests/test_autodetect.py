@@ -142,7 +142,9 @@ def test_declared_values_win_and_can_disable(
 
 def test_autodetect_shorthand() -> None:
     off = Settings.model_validate({"autodetect": False})
-    assert off.autodetect == AutodetectConfig(urls=False, descriptions=False, dependencies=False)
+    assert off.autodetect == AutodetectConfig(
+        urls=False, descriptions=False, dependencies=False, icons=False
+    )
     assert Settings.model_validate({"autodetect": None}).autodetect == AutodetectConfig()
     partial = Settings.model_validate({"autodetect": {"urls": False}})
     assert not partial.autodetect.urls and partial.autodetect.dependencies

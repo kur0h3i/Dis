@@ -10,6 +10,7 @@ import { formatBytes, formatMb, formatPct, formatUptime, STATUS_LABEL } from '..
 import { ExternalLink } from './ExternalLink';
 import { LogViewer } from './LogViewer';
 import { MiniChart } from './MiniChart';
+import { ServiceIcon } from './ServiceIcon';
 import { StatusDot } from './StatusDot';
 
 interface Props {
@@ -281,11 +282,13 @@ function PanelBody({ selection, tools, containers, onSelect }: Omit<Props, 'onCl
 
   const title = tool?.name ?? containerName ?? '—';
   const status = d?.status ?? tool?.status ?? 'stopped';
+  const icons = tool?.icons ?? d?.icons ?? [];
 
   return (
     <div className="space-y-6">
       <header className="space-y-2 pr-8">
         <div className="flex items-center gap-2">
+          <ServiceIcon icons={icons} name={title} size={28} className="mr-1" />
           <StatusDot status={status} />
           <h2 className="truncate font-mono text-lg font-semibold text-ink">{title}</h2>
           {tool?.is_self && (

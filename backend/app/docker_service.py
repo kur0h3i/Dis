@@ -23,6 +23,7 @@ from .autodetect import (
     guess_url,
 )
 from .config import Settings
+from .icons import declared_icon, guess_icons
 from .models import (
     ContainerDetail,
     ContainerStats,
@@ -45,6 +46,8 @@ LABEL_URL = "dis.url"
 LABEL_DESCRIPTION = "dis.description"
 # Dependencias separadas por comas: ``dis.depends_on: "minos-db,caronte"``.
 LABEL_DEPENDS_ON = "dis.depends_on"
+# Nombre del catálogo dashboard-icons o URL; vacío = sin logo.
+LABEL_ICON = "dis.icon"
 
 
 class DockerUnavailableError(RuntimeError):
@@ -193,10 +196,19 @@ def _summary(container: Container, settings: Settings) -> dict[str, Any]:
     else:
         depends_on = list(meta.depends_on) if meta else []
 
+    # Logo: label > dis.yaml > deducido de la imagen, el favicon o el nombre.
+    image = _image_name(container)
+    if LABEL_ICON in labels:
+        icons = declared_icon(labels[LABEL_ICON])
+    elif meta is not None and "icon" in meta.model_fields_set:
+        icons = declared_icon(meta.icon)
+    else:
+        icons = guess_icons(image, url, container.name) if auto.icons else []
+
     return {
         "id": container.short_id,
         "name": container.name,
-        "image": _image_name(container),
+        "image": image,
         "status": normalize_status(raw_state, health),
         "state": raw_state,
         "health": health,
@@ -205,6 +217,7 @@ def _summary(container: Container, settings: Settings) -> dict[str, Any]:
         "url": url,
         "description": description,
         "depends_on": depends_on,
+        "icons": icons,
         "detected": detected,
     }
 
