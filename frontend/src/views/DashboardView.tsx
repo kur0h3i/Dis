@@ -81,24 +81,27 @@ function HealthBand({
   const problems = containers.filter((c) =>
     ['unhealthy', 'restarting', 'paused'].includes(c.status),
   );
+  const stopped = containers.filter((c) => c.status === 'stopped').length;
   return (
     <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-line bg-surface px-4 py-3 font-mono text-xs">
       <span className="text-muted">
         {running}/{containers.length} en marcha
       </span>
-      {problems.length === 0 ? (
-        <span className="text-ok">Todo en orden</span>
-      ) : (
-        problems.map((c) => (
-          <button
-            key={c.name}
-            type="button"
-            onClick={() => onSelect({ kind: 'container', name: c.name })}
-            className={`hover:underline ${c.status === 'unhealthy' ? 'text-danger' : 'text-warn'}`}
-          >
-            {c.name} · {STATUS_LABEL[c.status]}
-          </button>
-        ))
+      {problems.length === 0 && stopped === 0 && <span className="text-ok">Todo en orden</span>}
+      {problems.map((c) => (
+        <button
+          key={c.name}
+          type="button"
+          onClick={() => onSelect({ kind: 'container', name: c.name })}
+          className={`hover:underline ${c.status === 'unhealthy' ? 'text-danger' : 'text-warn'}`}
+        >
+          {c.name} · {STATUS_LABEL[c.status]}
+        </button>
+      ))}
+      {stopped > 0 && (
+        <span className="text-muted">
+          {stopped} parado{stopped === 1 ? '' : 's'}
+        </span>
       )}
       {staleFor !== null && (
         <span className="text-warn">Docker sin actualizar · dato de {formatAge(staleFor)}</span>
@@ -245,7 +248,6 @@ export function DashboardView({
   const [sortMode, setSortMode] = useState(readSortMode);
   const rawList = containers.data ?? [];
   const list = sortContainers(rawList, sortMode);
-  const runningCount = rawList.filter((c) => c.status === 'running').length;
   const activeCount = rawList.filter(isActive).length;
   const selectedContainer = selection?.kind === 'container' ? selection.name : null;
 
@@ -292,7 +294,6 @@ export function DashboardView({
       <section>
         <SectionTitle
           title="Servicios Docker"
-          meta={containers.data ? `${runningCount}/${rawList.length} en marcha` : undefined}
           action={
             rawList.length > 1 ? (
               <button
