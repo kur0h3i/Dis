@@ -66,7 +66,7 @@ export default function App() {
                 type="button"
                 onClick={() => setView(v)}
                 aria-pressed={view === v}
-                className={`min-h-9 rounded-md px-2 py-1.5 transition-colors sm:min-h-0 sm:px-3 ${
+                className={`min-h-10 rounded-md px-2 py-1.5 transition-colors sm:min-h-0 sm:px-3 ${
                   view === v ? 'bg-accent text-white' : 'text-muted hover:text-ink'
                 }`}
               >
