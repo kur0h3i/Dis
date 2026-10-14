@@ -362,9 +362,30 @@ function PanelBody({ selection, tools, containers, onSelect }: Omit<Props, 'onCl
 export function ServicePanel({ selection, tools, containers, onSelect, onClose }: Props) {
   const open = selection != null;
   const panelRef = useRef<HTMLElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const returnFocusRef = useRef<Element | null>(null);
   // Mantiene el contenido durante la animación de cierre.
   const [shown, setShown] = useState<Selection | null>(selection);
   if (selection && selection !== shown) setShown(selection);
+
+  // Solo en la transición abrir/cerrar: cambiar de servicio con el panel abierto no mueve el foco.
+  useEffect(() => {
+    if (open) {
+      returnFocusRef.current = document.activeElement;
+      closeRef.current?.focus();
+      return;
+    }
+    const prev = returnFocusRef.current;
+    const active = document.activeElement;
+    if (
+      prev instanceof HTMLElement &&
+      prev.isConnected &&
+      (active === document.body || panelRef.current?.contains(active))
+    ) {
+      prev.focus();
+    }
+    returnFocusRef.current = null;
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -404,6 +425,7 @@ export function ServicePanel({ selection, tools, containers, onSelect, onClose }
       }`}
     >
       <button
+        ref={closeRef}
         type="button"
         onClick={onClose}
         aria-label="Cerrar panel"
