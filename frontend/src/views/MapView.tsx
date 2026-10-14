@@ -46,9 +46,9 @@ import {
 import { nodeMatchesSelection, selectionFor } from '../lib/selection';
 import type { Theme } from '../lib/theme';
 
-// hex y no var(): el MiniMap/SVG los pinta fuera del CSS.
 // Se lee una vez al cargar; si cambia la preferencia hay que recargar.
 const MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1;
+// hex y no var(): el MiniMap/SVG los pinta fuera del CSS.
 const EDGE_OK = '#7c3aed';
 const EDGE_DOWN = '#f97316';
 // Margen superior extra para que la barra de búsqueda y leyenda no tape nodos.
