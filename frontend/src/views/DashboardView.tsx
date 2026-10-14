@@ -144,7 +144,7 @@ function ContainerGroup({
       {items.length === 0 ? (
         <p className="font-mono text-xs text-faint">{emptyText}</p>
       ) : (
-        <div className="grid gap-4 @xl:grid-cols-2 @4xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 @xl:grid-cols-2 @4xl:grid-cols-3">
           {items.map((c) => (
             <ContainerCard
               key={c.id}
@@ -281,7 +281,7 @@ export function DashboardView({
       <section>
         <SectionTitle title="Herramientas" meta="ecosistema server-kuro" />
         {tools.error && <ErrorBox message={tools.error.message} />}
-        <div className="grid gap-4 @xl:grid-cols-2 @4xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 @xl:grid-cols-2 @4xl:grid-cols-3">
           {!tools.data && !tools.error && (
             <>
               <Skeleton className="h-28" />
@@ -324,7 +324,7 @@ export function DashboardView({
         />
         {containers.error && <ErrorBox message={containers.error.message} />}
         {!containers.data && !containers.error && (
-          <div className="grid gap-4 @xl:grid-cols-2 @4xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 @xl:grid-cols-2 @4xl:grid-cols-3">
             <Skeleton className="h-36" />
             <Skeleton className="h-36" />
             <Skeleton className="h-36" />
@@ -352,7 +352,7 @@ export function DashboardView({
               />
             </div>
           ) : (
-            <div className="grid gap-4 @xl:grid-cols-2 @4xl:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 @xl:grid-cols-2 @4xl:grid-cols-3">
               {list.map((c) => (
                 <ContainerCard
                   key={c.id}
