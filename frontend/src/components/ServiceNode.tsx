@@ -29,7 +29,7 @@ function ServiceNodeImpl({ data, selected }: NodeProps<ServiceFlowNode>) {
     <div
       data-dis-selectable
       style={{ width: NODE_WIDTH }}
-      className={`overflow-hidden rounded-lg border bg-surface shadow-lg shadow-black/20 transition-[opacity,border-color,box-shadow] duration-200 ${
+      className={`overflow-hidden border bg-surface shadow-lg shadow-black/20 transition-[opacity,border-color,box-shadow] duration-200 ${
         active
           ? 'border-accent ring-2 ring-accent/30'
           : selected

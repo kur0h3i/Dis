@@ -287,7 +287,7 @@ function MapCanvas({ theme, selection, onSelect }: Props) {
   }
 
   return (
-    <div className="h-full w-full">
+    <div className="hud h-full w-full !p-0">
       <ReactFlow
         nodes={displayNodes}
         edges={edges}
@@ -327,7 +327,7 @@ function MapCanvas({ theme, selection, onSelect }: Props) {
           {/* Seleccionable: buscar o filtrar no cierra el panel lateral. */}
           <div
             data-dis-selectable
-            className="space-y-2 rounded-lg border border-line bg-surface/90 p-2.5 font-mono text-[11px] text-muted shadow backdrop-blur"
+            className="hud space-y-2 bg-surface/90 p-2.5 font-mono text-[11px] text-muted shadow backdrop-blur"
           >
             <MapSearch
               nodes={graph.data?.nodes ?? []}

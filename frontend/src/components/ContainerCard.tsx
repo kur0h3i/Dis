@@ -18,7 +18,7 @@ export function ContainerCard({ container: c, onSelect, selected = false }: Prop
     <div
       data-dis-selectable
       {...clickableProps(() => onSelect(c.name))}
-      className={`group flex w-full cursor-pointer flex-col gap-3 rounded-lg border bg-surface p-4 text-left transition-colors hover:border-accent/60 ${
+      className={`group flex w-full cursor-pointer flex-col gap-3 hud p-4 text-left transition-colors hover:border-accent/60 ${
         selected ? 'border-accent' : 'border-line'
       } ${running ? '' : 'opacity-70'}`}
     >

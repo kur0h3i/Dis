@@ -4,7 +4,7 @@ import { AlertsPanel } from '../components/AlertsPanel';
 import { ContainerCard } from '../components/ContainerCard';
 import { MiniChart } from '../components/MiniChart';
 import { ResourceBar } from '../components/ResourceBar';
-import { ToolCard } from '../components/ToolCard';
+import { EventConsole, LoadBars, ModulesNav, ServiceRadar } from '../components/Hud';
 import { isActive, readSortMode, saveSortMode, sortContainers } from '../lib/sortContainers';
 
 // Muestras de 10 s en 5 minutos: la sparkline crece de derecha a izquierda.
@@ -44,9 +44,7 @@ function SectionTitle({
 }) {
   return (
     <div className="mb-3 flex items-baseline justify-between gap-4">
-      <h2 className="font-mono text-xs font-semibold tracking-[0.2em] text-faint uppercase">
-        {title}
-      </h2>
+      <h2 className="hud-title !mb-0 !justify-start">{title}</h2>
       <div className="flex items-baseline gap-3">
         {meta && <span className="font-mono text-xs text-faint">{meta}</span>}
         {action}
@@ -90,7 +88,7 @@ function ContainerGroup({
       {items.length === 0 ? (
         <p className="font-mono text-xs text-faint">{emptyText}</p>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">
           {items.map((c) => (
             <ContainerCard
               key={c.id}
@@ -120,7 +118,7 @@ function ResourcesSection({ q }: { q: Query<Resources> }) {
   const labels = r.history_5m.map((s) => timeLabel(s.ts));
   return (
     <div className="grid gap-4 md:grid-cols-3">
-      <div className="flex flex-col gap-3 rounded-lg border border-line bg-surface p-4">
+      <div className="flex flex-col gap-3 hud">
         <div className="flex items-baseline justify-between">
           <span className="font-mono text-xs text-muted">CPU</span>
           <span className="font-mono text-[11px] text-faint">{r.cpu_count} hilos</span>
@@ -140,7 +138,7 @@ function ResourcesSection({ q }: { q: Query<Resources> }) {
         />
       </div>
 
-      <div className="flex flex-col gap-3 rounded-lg border border-line bg-surface p-4">
+      <div className="flex flex-col gap-3 hud">
         <div className="flex items-baseline justify-between">
           <span className="font-mono text-xs text-muted">RAM</span>
           <span className="font-mono text-[11px] text-faint">
@@ -164,7 +162,7 @@ function ResourcesSection({ q }: { q: Query<Resources> }) {
         />
       </div>
 
-      <div className="flex flex-col gap-3 rounded-lg border border-line bg-surface p-4">
+      <div className="flex flex-col gap-3 hud">
         <span className="font-mono text-xs text-muted">Discos</span>
         {r.disks.length === 0 && <p className="text-sm text-faint">Sin discos configurados.</p>}
         <div className="space-y-3">
@@ -207,103 +205,100 @@ export function DashboardView({
   };
 
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-10 px-4 py-6 sm:px-6">
-      <section>
-        <SectionTitle title="Recursos del servidor" meta="cada 10 s · últimos 5 min" />
-        <ResourcesSection q={resources} />
-      </section>
-
-      <section>
-        <SectionTitle title="Herramientas" meta="ecosistema server-kuro" />
+    <div className="cy-main mx-auto max-w-[96rem] px-4 py-5 sm:px-6">
+      <aside className="cy-side">
         {tools.error && <ErrorBox message={tools.error.message} />}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {!tools.data && !tools.error && (
-            <>
-              <Skeleton className="h-28" />
-              <Skeleton className="h-28" />
-              <Skeleton className="h-28" />
-            </>
-          )}
-          {tools.data?.map((t) => (
-            <ToolCard key={t.id} tool={t} onSelect={(id) => onSelect({ kind: 'tool', id })} />
-          ))}
-        </div>
-      </section>
-
-      <section>
-        <SectionTitle
-          title="Servicios Docker"
-          meta={containers.data ? `${runningCount}/${rawList.length} en marcha` : undefined}
-          action={
-            rawList.length > 1 ? (
-              <button
-                type="button"
-                onClick={toggleSort}
-                aria-pressed={sortMode === 'active-first'}
-                title={
-                  sortMode === 'active-first'
-                    ? 'Orden por defecto'
-                    : 'Primero los que se pueden abrir (con UI web)'
-                }
-                className={`rounded-md border px-2 py-1 font-mono text-[11px] transition-colors ${
-                  sortMode === 'active-first'
-                    ? 'border-accent/60 bg-accent/10 text-accent-ink'
-                    : 'border-line text-muted hover:border-accent/40 hover:text-ink'
-                }`}
-              >
-                {sortMode === 'active-first'
-                  ? `abribles primero · ${activeCount}`
-                  : 'ordenar: abribles primero'}
-              </button>
-            ) : undefined
-          }
+        <ModulesNav
+          tools={tools.data}
+          selectedId={selection?.kind === 'tool' ? selection.id : null}
+          onSelect={(id) => onSelect({ kind: 'tool', id })}
         />
-        {containers.error && <ErrorBox message={containers.error.message} />}
-        {!containers.data && !containers.error && (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <Skeleton className="h-36" />
-            <Skeleton className="h-36" />
-            <Skeleton className="h-36" />
-          </div>
-        )}
-        {containers.data && list.length === 0 && (
-          <p className="text-sm text-muted">No hay contenedores.</p>
-        )}
-        {list.length > 0 &&
-          (sortMode === 'active-first' ? (
-            <div className="space-y-6">
-              <ContainerGroup
-                label="Abribles · con UI web"
-                items={list.filter(isActive)}
-                selectedContainer={selectedContainer}
-                onSelect={onSelect}
-                emptyText="Ninguno en marcha con UI web."
-              />
-              <ContainerGroup
-                label="Pasivos · sin UI web"
-                items={list.filter((c) => !isActive(c))}
-                selectedContainer={selectedContainer}
-                onSelect={onSelect}
-                emptyText="Ninguno."
-              />
-            </div>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {list.map((c) => (
-                <ContainerCard
-                  key={c.id}
-                  container={c}
-                  selected={selectedContainer === c.name}
-                  onSelect={(name) => onSelect({ kind: 'container', name })}
-                />
-              ))}
-            </div>
-          ))}
-      </section>
+        <LoadBars resources={resources.data} />
+        <ServiceRadar containers={containers.data} />
+      </aside>
 
-      <section>
+      <div className="cy-center flex min-w-0 flex-col gap-8">
+        <section>
+          <SectionTitle title="Recursos del servidor" meta="cada 10 s · últimos 5 min" />
+          <ResourcesSection q={resources} />
+        </section>
+
+        <section>
+          <SectionTitle
+            title="Servicios Docker"
+            meta={containers.data ? `${runningCount}/${rawList.length} en marcha` : undefined}
+            action={
+              rawList.length > 1 ? (
+                <button
+                  type="button"
+                  onClick={toggleSort}
+                  aria-pressed={sortMode === 'active-first'}
+                  title={
+                    sortMode === 'active-first'
+                      ? 'Orden por defecto'
+                      : 'Primero los que se pueden abrir (con UI web)'
+                  }
+                  className={`rounded-md border px-2 py-1 font-mono text-[11px] transition-colors ${
+                    sortMode === 'active-first'
+                      ? 'border-accent/60 bg-accent/10 text-accent-ink'
+                      : 'border-line text-muted hover:border-accent/40 hover:text-ink'
+                  }`}
+                >
+                  {sortMode === 'active-first'
+                    ? `abribles primero · ${activeCount}`
+                    : 'ordenar: abribles primero'}
+                </button>
+              ) : undefined
+            }
+          />
+          {containers.error && <ErrorBox message={containers.error.message} />}
+          {!containers.data && !containers.error && (
+            <div className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">
+              <Skeleton className="h-36" />
+              <Skeleton className="h-36" />
+              <Skeleton className="h-36" />
+            </div>
+          )}
+          {containers.data && list.length === 0 && (
+            <p className="text-sm text-muted">No hay contenedores.</p>
+          )}
+          {list.length > 0 &&
+            (sortMode === 'active-first' ? (
+              <div className="space-y-6">
+                <ContainerGroup
+                  label="Abribles · con UI web"
+                  items={list.filter(isActive)}
+                  selectedContainer={selectedContainer}
+                  onSelect={onSelect}
+                  emptyText="Ninguno en marcha con UI web."
+                />
+                <ContainerGroup
+                  label="Pasivos · sin UI web"
+                  items={list.filter((c) => !isActive(c))}
+                  selectedContainer={selectedContainer}
+                  onSelect={onSelect}
+                  emptyText="Ninguno."
+                />
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">
+                {list.map((c) => (
+                  <ContainerCard
+                    key={c.id}
+                    container={c}
+                    selected={selectedContainer === c.name}
+                    onSelect={(name) => onSelect({ kind: 'container', name })}
+                  />
+                ))}
+              </div>
+            ))}
+        </section>
+      </div>
+
+      <aside className="cy-side cy-side2">
+        <EventConsole containers={containers.data} alerts={alerts.data} />
         <AlertsPanel alerts={alerts.data} loading={alerts.isLoading} />
-      </section>
+      </aside>
     </div>
   );
 }
