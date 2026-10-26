@@ -46,7 +46,7 @@ import {
 import { nodeMatchesSelection, selectionFor } from '../lib/selection';
 import type { Theme } from '../lib/theme';
 
-const EDGE_OK = '#7c3aed';
+const EDGE_OK = '#00c4d4';
 const EDGE_DOWN = '#f97316';
 // Margen superior extra para que la barra de búsqueda y leyenda no tape nodos.
 const FIT_VIEW: FitViewOptions = {

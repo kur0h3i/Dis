@@ -67,7 +67,9 @@ export default function App() {
                 onClick={() => setView(v)}
                 aria-pressed={view === v}
                 className={`rounded-md px-3 py-1.5 transition-colors ${
-                  view === v ? 'bg-accent text-white' : 'text-muted hover:text-ink'
+                  view === v
+                    ? 'bg-accent text-[color:var(--on-accent)]'
+                    : 'text-muted hover:text-ink'
                 }`}
               >
                 {v === 'dashboard' ? 'Dashboard' : 'Mapa'}
@@ -94,6 +96,16 @@ export default function App() {
             title="Añadir servicio"
           >
             +<span className="hidden sm:inline"> Añadir</span>
+          </button>
+
+          <button
+            type="button"
+            data-cyber-calm
+            className="rounded-lg border border-line bg-surface px-2.5 py-1.5 font-mono text-xs text-muted hover:text-ink"
+            title="Fondo animado (modo completo) / sereno"
+            aria-label="Alternar modo sereno"
+          >
+            ◈
           </button>
 
           <button

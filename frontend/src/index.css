@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&family=Rajdhani:wght@500;700&family=Share+Tech+Mono&display=swap');
 @import 'tailwindcss';
 
 @custom-variant dark (&:where(.dark, .dark *));
@@ -15,19 +16,24 @@
   --accent-2: #a78bfa;
   --accent-ink: #6d28d9;
   --grid: #e4e4e7;
+  --on-accent: #ffffff;
   color-scheme: light;
 }
 
 :root.dark {
-  --bg: #0a0a0a;
-  --surface: #111111;
-  --surface-2: #181818;
-  --border: #262626;
-  --text: #e5e5e5;
-  --muted: #a3a3a3;
-  --faint: #737373;
-  --accent-ink: #a78bfa;
-  --grid: #262626;
+  /* Cerbero Cyber (modo sereno): ver public/cerbero-cyber.js para el fondo opcional. */
+  --bg: #03050c;
+  --surface: #050a14;
+  --surface-2: #08121f;
+  --border: #0b4f5c;
+  --text: #d6f7ff;
+  --muted: #8fb4c4;
+  --faint: #5f8fa3;
+  --accent: #00f0ff;
+  --accent-2: #7a3df0;
+  --accent-ink: #00f0ff;
+  --grid: #0b2a33;
+  --on-accent: #03050c;
   color-scheme: dark;
 }
 
@@ -43,10 +49,11 @@
   --color-accent-2: var(--accent-2);
   --color-accent-ink: var(--accent-ink);
   --font-mono:
-    'JetBrains Mono', 'Fira Code', 'Cascadia Code', ui-monospace, SFMono-Regular, Menlo, Consolas,
-    monospace;
+    'Share Tech Mono', 'JetBrains Mono', 'Fira Code', 'Cascadia Code', ui-monospace, SFMono-Regular,
+    Menlo, Consolas, monospace;
   --font-sans:
-    'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    'Rajdhani', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
 }
 
 html,
@@ -98,4 +105,40 @@ body {
 
 .react-flow__edge.dis-edge-faded {
   opacity: 0.15;
+}
+
+/* Cerbero Cyber */
+.dark #bg {
+  z-index: 0;
+}
+.dark body,
+.dark #root {
+  position: relative;
+  z-index: 1;
+}
+:root:not(.dark) #bg {
+  display: none;
+}
+html[data-calm] #bg {
+  display: none;
+}
+.dark .font-display {
+  font-family: 'Orbitron', var(--font-mono);
+}
+.dark header .font-bold {
+  text-shadow: 0 0 14px var(--accent);
+}
+html[data-calm] header .font-bold {
+  text-shadow: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+.dark:not([data-calm]) .react-flow {
+  --xy-background-color: transparent;
 }
