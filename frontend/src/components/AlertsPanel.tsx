@@ -17,7 +17,7 @@ export function AlertsPanel({ alerts, loading = false }: Props) {
   // TODO: Cerbero live — streaming (SSE/WebSocket) cuando su API esté lista.
   const connected = alerts?.connected ?? false;
   return (
-    <div className="rounded-lg border border-line bg-surface p-4">
+    <div className="hud">
       <div className="mb-2 flex items-center justify-between">
         <h3 className="font-mono text-sm font-semibold text-ink">Alertas · Cerbero</h3>
         <span className="font-mono text-[11px] text-faint">
